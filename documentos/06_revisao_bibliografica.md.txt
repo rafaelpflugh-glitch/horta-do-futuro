@@ -1,0 +1,294 @@
+# HORTA DO FUTURO
+
+# Revisão Bibliográfica
+
+## Sistema de Monitoramento Agrícola Inteligente para Ambientes Controlados Aplicado à Agricultura Urbana e Pequenos Produtores
+
+
+---
+
+# 1. INTRODUÇÃO
+
+
+A produção de alimentos enfrenta atualmente desafios relacionados ao crescimento populacional, urbanização acelerada, redução de áreas disponíveis para cultivo e necessidade de utilização mais eficiente dos recursos naturais.
+
+
+Nesse contexto, novas tecnologias aplicadas à agricultura surgem como ferramentas capazes de aumentar a eficiência produtiva, reduzir desperdícios e aproximar a produção de alimentos dos centros urbanos.
+
+
+A Horta do Futuro está inserida nesse cenário, propondo o desenvolvimento de um sistema embarcado inteligente para monitoramento de cultivos hidropônicos em ambientes controlados.
+
+
+O projeto combina conceitos de hidroponia, agricultura urbana, Internet das Coisas (IoT), sistemas embarcados e agricultura de precisão.
+
+
+---
+
+# 2. HIDROPONIA
+
+
+A hidroponia é uma técnica de cultivo onde as plantas são desenvolvidas sem a utilização direta do solo, recebendo nutrientes dissolvidos em água.
+
+
+Segundo estudos realizados no Brasil, a hidroponia apresenta vantagens como:
+
+
+- redução do consumo de água;
+- maior controle nutricional;
+- possibilidade de cultivo em pequenos espaços;
+- produção em ambientes urbanos.
+
+
+O controle da solução nutritiva é um dos fatores fundamentais para o sucesso do cultivo hidropônico.
+
+
+Parâmetros como:
+
+
+- pH;
+- condutividade elétrica;
+- temperatura da solução;
+
+
+possuem influência direta na disponibilidade dos nutrientes para as plantas.
+
+
+A Horta do Futuro utiliza estes princípios ao monitorar continuamente as condições do reservatório nutritivo.
+
+
+---
+
+# 3. AGRICULTURA URBANA
+
+
+A expansão das cidades criou novos desafios relacionados ao acesso aos alimentos.
+
+
+A agricultura urbana surge como uma alternativa para aproximar a produção do consumidor, utilizando espaços reduzidos como:
+
+
+- residências;
+- escolas;
+- comunidades;
+- pequenos ambientes urbanos.
+
+
+Pesquisas brasileiras destacam que a agricultura urbana possui não apenas importância produtiva, mas também social, ambiental e educacional.
+
+
+Além de produzir alimentos, ela promove:
+
+
+- autonomia;
+- educação ambiental;
+- aproximação entre sociedade e natureza.
+
+
+A Horta do Futuro se baseia nessa perspectiva ao propor uma tecnologia acessível para pequenos cultivos domésticos.
+
+
+---
+
+# 4. AGRICULTURA DE PRECISÃO
+
+
+A agricultura de precisão representa uma mudança no modelo tradicional de produção agrícola.
+
+
+Ao invés de aplicar recursos de maneira uniforme, utiliza dados para tomar decisões específicas.
+
+
+São utilizados:
+
+
+- sensores;
+- sistemas de aquisição;
+- processamento de dados;
+- automação.
+
+
+Inicialmente aplicada em grandes propriedades rurais, a agricultura de precisão vem sendo adaptada para pequenas escalas.
+
+
+A Horta do Futuro utiliza este conceito ao transformar medições ambientais em informações úteis ao usuário.
+
+
+O sistema não apenas mede:
+
+"qual a temperatura?"
+
+
+Mas busca responder:
+
+"as condições atuais são adequadas para o desenvolvimento da planta?"
+
+
+---
+
+# 5. INTERNET DAS COISAS (IoT) NA AGRICULTURA
+
+
+A Internet das Coisas consiste na integração entre dispositivos físicos capazes de coletar dados, processá-los e comunicar informações.
+
+
+Na agricultura, a IoT permite:
+
+
+- monitoramento remoto;
+- controle automático;
+- redução de desperdícios;
+- tomada de decisão baseada em dados.
+
+
+Sensores conectados a microcontroladores permitem criar sistemas inteligentes de baixo custo.
+
+
+A Horta do Futuro utiliza esta abordagem através do ESP32, sensores ambientais e módulos de automação.
+
+
+---
+
+# 6. SISTEMAS EMBARCADOS
+
+
+Sistemas embarcados são sistemas computacionais desenvolvidos para executar funções específicas dentro de equipamentos.
+
+
+Eles possuem características como:
+
+
+- baixo consumo energético;
+- processamento dedicado;
+- integração com sensores;
+- controle de atuadores.
+
+
+Microcontroladores como o ESP32 possibilitam o desenvolvimento de soluções acessíveis para aplicações inteligentes.
+
+
+No projeto Horta do Futuro, o sistema embarcado atua como o cérebro responsável pela aquisição, interpretação e controle do ambiente.
+
+
+---
+
+# 7. AUTOMAÇÃO DE AMBIENTES CONTROLADOS
+
+
+Ambientes controlados permitem modificar variáveis externas para favorecer o desenvolvimento das plantas.
+
+
+A automação possibilita controlar:
+
+
+- iluminação;
+- temperatura;
+- ventilação;
+- bombeamento;
+- irrigação.
+
+
+Sistemas automatizados reduzem a necessidade de intervenção constante e aumentam a estabilidade do cultivo.
+
+
+Na Horta do Futuro, a automação é baseada em regras de cultivo, permitindo que o sistema execute ações conforme as necessidades identificadas.
+
+
+---
+
+# 8. SUSTENTABILIDADE E USO EFICIENTE DE RECURSOS
+
+
+A sustentabilidade agrícola busca equilibrar produção de alimentos, preservação ambiental e uso racional dos recursos.
+
+
+Sistemas hidropônicos podem contribuir através de:
+
+
+- redução do consumo de água;
+- otimização de nutrientes;
+- produção local.
+
+
+Entretanto, a tecnologia deve ser acompanhada de acessibilidade.
+
+
+Uma solução sustentável precisa também ser economicamente viável e socialmente inclusiva.
+
+
+---
+
+# 9. DEMOCRATIZAÇÃO TECNOLÓGICA
+
+
+Tecnologias agrícolas avançadas frequentemente possuem alto custo e são destinadas a grandes produtores.
+
+
+A popularização de plataformas eletrônicas de baixo custo possibilita desenvolver alternativas menores e acessíveis.
+
+
+A Horta do Futuro parte do princípio de que tecnologias inteligentes não devem estar restritas apenas ao ambiente industrial.
+
+
+O projeto busca aproximar:
+
+
+- agricultura;
+- eletrônica;
+- programação;
+- sociedade.
+
+
+A proposta é transformar uma pessoa em participante ativa da produção de seus próprios alimentos.
+
+
+---
+
+# 10. INTELIGÊNCIA ARTIFICIAL E FUTURO DOS CULTIVOS
+
+
+O avanço dos sistemas inteligentes permite imaginar uma nova geração de equipamentos agrícolas capazes não apenas de medir, mas interpretar informações.
+
+
+Um futuro desenvolvimento da Horta do Futuro poderá incorporar inteligência artificial especializada em cultivo.
+
+
+Esse sistema poderia atuar como um supervisor digital:
+
+
+- analisando históricos;
+- identificando padrões;
+- sugerindo ajustes;
+- auxiliando operadores.
+
+
+---
+
+# 11. RELAÇÃO ENTRE A LITERATURA E O PROJETO
+
+
+A Horta do Futuro reúne diferentes áreas do conhecimento:
+
+
+| Área | Aplicação no projeto |
+|-|-|
+| Hidroponia | Cultivo sem solo |
+| Agricultura urbana | Produção doméstica |
+| Agricultura de precisão | Decisão baseada em dados |
+| IoT | Sensores conectados |
+| Sistemas embarcados | ESP32 |
+| Automação | Controle do ambiente |
+| Sustentabilidade | Uso eficiente de recursos |
+
+
+---
+
+# 12. CONCLUSÃO DA REVISÃO
+
+
+A literatura demonstra que a integração entre agricultura e tecnologia representa uma das principais tendências para o desenvolvimento de sistemas produtivos mais eficientes e sustentáveis.
+
+
+A Horta do Futuro aplica esses conceitos em uma escala reduzida, demonstrando que tecnologias utilizadas em grandes sistemas agrícolas podem ser adaptadas para ambientes urbanos e pequenos produtores.
+
+
+O projeto propõe uma visão de futuro onde tecnologia e natureza não são opostas, mas trabalham juntas para criar novas formas de produzir alimentos.

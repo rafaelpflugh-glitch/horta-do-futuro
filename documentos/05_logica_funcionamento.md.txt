@@ -1,0 +1,710 @@
+# HORTA DO FUTURO
+
+# Lógica de Funcionamento do Sistema
+
+## Documento de Inteligência e Controle
+
+Versão:
+V1.0
+
+
+---
+
+# 1. INTRODUÇÃO
+
+
+A Horta do Futuro foi desenvolvida com o conceito de um computador de plantas.
+
+O sistema não deve apenas coletar informações, mas interpretar as condições do ambiente e fornecer respostas úteis ao usuário.
+
+
+O funcionamento é baseado em cinco etapas:
+
+MEDIR
+
+↓
+
+PROCESSAR
+
+↓
+
+INTERPRETAR
+
+↓
+
+DECIDIR
+
+↓
+
+AGIR
+
+
+
+---
+
+# 2. CICLO PRINCIPAL DE FUNCIONAMENTO
+
+
+O ESP32 executa continuamente um ciclo:
+
+
+
+Inicialização
+
+↓
+
+Carregar configuração
+
+↓
+
+Identificar cultivo ativo
+
+↓
+
+Ler sensores
+
+↓
+
+Validar dados
+
+↓
+
+Calcular saúde
+
+↓
+
+Gerar diagnóstico
+
+↓
+
+Atualizar display
+
+↓
+
+Executar automação
+
+↓
+
+Registrar dados
+
+↓
+
+Repetir
+
+
+
+---
+
+# 3. PERFIL DE CULTIVO
+
+
+A Horta do Futuro trabalha com perfis configuráveis.
+
+
+Cada perfil contém:
+
+
+- nome da planta;
+- temperatura ideal;
+- umidade ideal;
+- pH ideal;
+- EC ideal;
+- fotoperíodo;
+- limites de alerta.
+
+
+---
+
+# Exemplo de perfil
+
+
+## ALFACE
+
+
+
+Nome:
+
+Alface
+
+Temperatura ideal:
+
+18°C a 26°C
+
+pH:
+
+5.5 a 6.5
+
+EC:
+
+1.0 a 1.8 mS/cm
+
+Fotoperíodo:
+
+16 horas luz
+
+8 horas escuro
+
+
+
+---
+
+## MANJERICÃO
+
+
+
+Nome:
+
+Manjericão
+
+Temperatura:
+
+20°C a 30°C
+
+pH:
+
+5.5 a 6.8
+
+EC:
+
+1.0 a 2.0 mS/cm
+
+Fotoperíodo:
+
+14 horas luz
+
+10 horas escuro
+
+
+
+---
+
+# 4. LEITURA DOS SENSORES
+
+
+Cada sensor possui uma função específica.
+
+
+---
+
+# Temperatura do ar
+
+
+Sensor:
+
+DHT22
+
+
+Utilizado para:
+
+
+- avaliar conforto térmico;
+- controlar ventilação.
+
+
+---
+
+# Temperatura da água
+
+
+Sensor:
+
+DS18B20
+
+
+Utilizado para:
+
+
+- avaliar solução nutritiva;
+- evitar condições inadequadas para raízes.
+
+
+---
+
+# pH
+
+
+Sensor:
+
+Módulo de pH
+
+
+Utilizado para:
+
+
+- verificar disponibilidade dos nutrientes.
+
+
+---
+
+# EC/TDS
+
+
+Sensor:
+
+Condutividade elétrica
+
+
+Utilizado para:
+
+
+- avaliar concentração de nutrientes.
+
+
+---
+
+# Nível
+
+
+Sensor:
+
+XKC-Y25
+
+
+Utilizado para:
+
+
+- identificar falta de solução.
+
+
+---
+
+# 5. ÍNDICE DE SAÚDE DO CULTIVO
+
+
+A Horta do Futuro possui um sistema de avaliação.
+
+
+O índice varia de:
+
+
+
+0%
+
+até
+
+100%
+
+
+
+Quanto maior o valor, melhores as condições.
+
+
+---
+
+# Cálculo inicial
+
+
+Peso dos parâmetros:
+
+
+
+Temperatura:
+
+20%
+
+pH:
+
+30%
+
+EC:
+
+30%
+
+Nível:
+
+10%
+
+Umidade:
+
+10%
+
+
+
+---
+
+# Exemplo
+
+
+Dados:
+
+
+
+Temperatura:
+
+24°C
+
+pH:
+
+6.1
+
+EC:
+
+1.4
+
+Nível:
+
+OK
+
+
+
+Resultado:
+
+
+
+Saúde:
+
+94%
+
+STATUS:
+
+Excelente
+
+
+
+---
+
+# 6. CLASSIFICAÇÃO DO CULTIVO
+
+
+## 90% - 100%
+
+
+Estado:
+
+Excelente
+
+
+Mensagem:
+
+
+"Ambiente ideal para desenvolvimento."
+
+
+---
+
+## 70% - 89%
+
+
+Estado:
+
+Bom
+
+
+Mensagem:
+
+
+"Pequenas correções podem melhorar o cultivo."
+
+
+---
+
+## 50% - 69%
+
+
+Estado:
+
+Atenção
+
+
+Mensagem:
+
+
+"Condições fora do ideal."
+
+
+---
+
+## Menor que 50%
+
+
+Estado:
+
+Crítico
+
+
+Mensagem:
+
+
+"Intervenção necessária."
+
+
+---
+
+# 7. SISTEMA DE DIAGNÓSTICO
+
+
+O sistema converte dados em mensagens.
+
+
+Exemplos:
+
+
+---
+
+## pH alto
+
+
+Condição:
+
+
+
+pH > limite máximo
+
+
+
+Diagnóstico:
+
+
+
+pH elevado.
+
+Verificar solução nutritiva.
+
+
+
+---
+
+## Temperatura elevada
+
+
+Condição:
+
+
+
+Temperatura > limite
+
+
+
+Diagnóstico:
+
+
+
+Temperatura acima do recomendado.
+
+Melhorar ventilação.
+
+
+
+---
+
+## Nível baixo
+
+
+Condição:
+
+
+
+Sensor nível ativo
+
+
+
+Diagnóstico:
+
+
+
+Reservatório necessita verificação.
+
+
+
+---
+
+# 8. AUTOMAÇÃO
+
+
+## Iluminação
+
+
+Controle:
+
+
+Baseado no horário.
+
+
+Exemplo:
+
+
+
+06:00
+
+Liga LED
+
+22:00
+
+Desliga LED
+
+
+
+---
+
+# Ventilação
+
+
+Controle:
+
+
+Baseado na temperatura.
+
+
+Exemplo:
+
+
+
+Temperatura > 28°C
+
+Liga ventilação
+
+Temperatura < 25°C
+
+Desliga
+
+
+
+---
+
+# Oxigenação
+
+
+Controle:
+
+
+Bomba de ar.
+
+
+Exemplo:
+
+
+
+15 minutos ligada
+
+15 minutos desligada
+
+
+
+---
+
+# 9. MODOS DE OPERAÇÃO
+
+
+A Horta do Futuro terá três modos.
+
+
+---
+
+# Modo Automático
+
+
+O sistema decide ações baseado nos parâmetros.
+
+
+---
+
+# Modo Manual
+
+
+Usuário controla:
+
+
+- luz;
+- bomba;
+- ventilação.
+
+
+---
+
+# Modo Diagnóstico
+
+
+Utilizado para testes.
+
+
+Mostra:
+
+
+- valores dos sensores;
+- estado dos relés;
+- comunicação.
+
+
+---
+
+# 10. INTERFACE DO USUÁRIO
+
+
+Tela principal:
+
+
+
+HORTA DO FUTURO
+
+ALFACE
+
+Saúde:
+94%
+
+Temp:
+24°C
+
+pH:
+6.1
+
+Água:
+OK
+
+
+
+---
+
+Menu:
+
+
+
+Cultivo
+
+Sensores
+
+Saúde
+
+Diagnóstico
+
+Configuração
+
+
+
+---
+
+# 11. FUTURA INTELIGÊNCIA ARTIFICIAL
+
+
+A arquitetura permite uma evolução para um assistente inteligente.
+
+
+O sistema poderá:
+
+
+- interpretar histórico;
+- sugerir ajustes;
+- comparar cultivos;
+- auxiliar operadores.
+
+
+O objetivo futuro é criar um supervisor digital do cultivo.
+
+
+---
+
+# 12. FILOSOFIA DO SISTEMA
+
+
+A Horta do Futuro não substitui o conhecimento humano.
+
+Ela transforma dados técnicos em informações compreensíveis.
+
+
+O usuário deixa de apenas observar uma planta.
+
+Ele passa a compreender o ambiente onde ela vive.
+
+
+---
+
+# FIM DO DOCUMENTO

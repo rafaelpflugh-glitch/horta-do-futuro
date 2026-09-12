@@ -1,0 +1,536 @@
+# HORTA DO FUTURO
+
+# Metodologia de Desenvolvimento
+
+## Sistema de Monitoramento Agrícola Inteligente para Ambientes Controlados Aplicado à Agricultura Urbana e Pequenos Produtores
+
+
+Versão:
+
+V1.0
+
+
+---
+
+# 1. INTRODUÇÃO
+
+
+A metodologia adotada para o desenvolvimento da Horta do Futuro será baseada na construção incremental de um sistema embarcado inteligente, dividido em etapas de planejamento, desenvolvimento, integração, testes e validação.
+
+
+O projeto será desenvolvido utilizando uma abordagem de prototipagem, onde cada módulo será testado individualmente antes da integração completa.
+
+
+Essa metodologia reduz falhas de desenvolvimento e permite a evolução progressiva do sistema.
+
+
+---
+
+# 2. MODELO DE DESENVOLVIMENTO
+
+
+O desenvolvimento seguirá uma abordagem modular:
+
+Planejamento
+
+↓
+
+Documentação
+
+↓
+
+Desenvolvimento eletrônico
+
+↓
+
+Programação embarcada
+
+↓
+
+Integração dos módulos
+
+↓
+
+Testes
+
+↓
+
+Cultivo experimental
+
+↓
+
+Avaliação dos resultados
+
+
+
+---
+
+# 3. ETAPA 1 — PLANEJAMENTO DO SISTEMA
+
+
+Nesta etapa são definidos:
+
+
+- objetivos do projeto;
+- requisitos técnicos;
+- arquitetura;
+- componentes;
+- funcionalidades.
+
+
+Documentos produzidos:
+
+
+- Especificação técnica;
+- Arquitetura do sistema;
+- Lista de materiais;
+- Mapa de pinos.
+
+
+---
+
+# 4. ETAPA 2 — DESENVOLVIMENTO DO HARDWARE
+
+
+Nesta etapa será realizada a montagem física do protótipo.
+
+
+Serão integrados:
+
+
+## Unidade de processamento
+
+
+ESP32 DevKit V1
+
+
+Responsável por:
+
+
+- leitura dos sensores;
+- processamento;
+- controle dos dispositivos.
+
+
+---
+
+## Sensores
+
+
+Serão utilizados:
+
+
+### Ambiente
+
+DHT22
+
+Medição de:
+
+- temperatura;
+- umidade.
+
+
+### Água
+
+DS18B20
+
+Medição:
+
+- temperatura da solução nutritiva.
+
+
+### Solução nutritiva
+
+Sensores:
+
+- pH;
+- EC/TDS.
+
+
+### Reservatório
+
+Sensor:
+
+XKC-Y25
+
+
+---
+
+## Atuadores
+
+
+Serão implementados:
+
+
+- iluminação;
+- bomba de ar;
+- ventilação.
+
+
+---
+
+# 5. ETAPA 3 — DESENVOLVIMENTO DO SOFTWARE
+
+
+O firmware será desenvolvido para o ESP32 utilizando programação modular.
+
+
+A estrutura será dividida em:
+
+
+
+Inicialização
+
+↓
+
+Configuração dos periféricos
+
+↓
+
+Leitura dos sensores
+
+↓
+
+Tratamento dos dados
+
+↓
+
+Análise das condições
+
+↓
+
+Cálculo de saúde
+
+↓
+
+Diagnóstico
+
+↓
+
+Controle dos atuadores
+
+↓
+
+Atualização da interface
+
+
+
+---
+
+# 6. ETAPA 4 — IMPLEMENTAÇÃO DA INTERFACE
+
+
+A interação inicial será realizada através de display OLED.
+
+
+Serão exibidas:
+
+
+- informações do cultivo;
+- sensores;
+- estado dos equipamentos;
+- diagnóstico.
+
+
+Exemplo:
+
+
+
+HORTA DO FUTURO
+
+ALFACE
+
+Saúde:
+94%
+
+Temperatura:
+24°C
+
+pH:
+6.1
+
+Água:
+OK
+
+
+
+---
+
+# 7. ETAPA 5 — CALIBRAÇÃO DOS SENSORES
+
+
+Todos os sensores analógicos serão submetidos a procedimentos de calibração.
+
+
+Especialmente:
+
+
+## Sensor de pH
+
+
+Será utilizado:
+
+
+- solução padrão;
+- ajuste de leitura.
+
+
+---
+
+## Sensor EC/TDS
+
+
+Será realizada comparação entre:
+
+
+- valor medido;
+- solução conhecida.
+
+
+---
+
+## Sensores ambientais
+
+
+Serão comparados com instrumentos de referência quando disponíveis.
+
+
+---
+
+# 8. ETAPA 6 — TESTES INDIVIDUAIS
+
+
+Antes da integração total, cada módulo será testado separadamente.
+
+
+Testes:
+
+
+## ESP32
+
+
+Verificar:
+
+
+- alimentação;
+- comunicação serial;
+- estabilidade.
+
+
+---
+
+## Display
+
+
+Verificar:
+
+
+- comunicação I2C;
+- atualização das informações.
+
+
+---
+
+## Sensores
+
+
+Verificar:
+
+
+- leitura;
+- estabilidade;
+- resposta.
+
+
+---
+
+## Relés
+
+
+Verificar:
+
+
+- acionamento;
+- isolamento;
+- segurança elétrica.
+
+
+---
+
+# 9. ETAPA 7 — INTEGRAÇÃO DO SISTEMA
+
+
+Após os testes individuais, todos os módulos serão integrados:
+
+
+
+Sensores
+
+↓
+
+ESP32
+
+↓
+
+Processamento
+
+↓
+
+Diagnóstico
+
+↓
+
+Display
+
+↓
+
+Atuadores
+
+
+
+O sistema será avaliado como um conjunto completo.
+
+
+---
+
+# 10. ETAPA 8 — CULTIVO EXPERIMENTAL
+
+
+Após a validação eletrônica, será iniciado um cultivo real.
+
+
+Cultivos escolhidos:
+
+
+## Alface
+
+
+Motivos:
+
+
+- crescimento rápido;
+- fácil observação;
+- ampla utilização em hidroponia.
+
+
+---
+
+## Manjericão
+
+
+Motivos:
+
+
+- características diferentes;
+- maior diversidade visual;
+- demonstração de versatilidade.
+
+
+---
+
+# 11. MONITORAMENTO DO DESENVOLVIMENTO
+
+
+Durante o cultivo serão registrados:
+
+
+- temperatura;
+- umidade;
+- pH;
+- EC;
+- nível;
+- índice de saúde.
+
+
+Também serão realizadas:
+
+
+- fotografias periódicas;
+- registro do desenvolvimento;
+- documentação visual.
+
+
+---
+
+# 12. VALIDAÇÃO DO SISTEMA
+
+
+A validação será realizada considerando:
+
+
+## Funcionamento eletrônico
+
+
+O sistema deve:
+
+
+- ler sensores;
+- controlar dispositivos;
+- apresentar informações.
+
+
+---
+
+## Funcionamento agrícola
+
+
+O sistema deve:
+
+
+- manter condições adequadas;
+- acompanhar desenvolvimento das plantas;
+- auxiliar decisões.
+
+
+---
+
+## Usabilidade
+
+
+O usuário deve conseguir:
+
+
+- visualizar informações;
+- compreender diagnósticos;
+- interagir com o sistema.
+
+
+---
+
+# 13. LIMITAÇÕES DA VALIDAÇÃO
+
+
+A primeira versão será considerada um protótipo experimental.
+
+
+Não tem como objetivo substituir sistemas agrícolas comerciais, mas demonstrar a aplicação de tecnologias inteligentes em pequena escala.
+
+
+---
+
+# 14. POSSIBILIDADES FUTURAS
+
+
+Após a validação inicial poderão ser adicionados:
+
+
+- aplicativo móvel;
+- câmera;
+- inteligência artificial;
+- múltiplos módulos de cultivo;
+- comunicação em rede.
+
+
+---
+
+# 15. CONCLUSÃO
+
+
+A metodologia proposta permite desenvolver a Horta do Futuro de forma organizada, garantindo que cada etapa seja validada antes da evolução para a próxima fase.
+
+
+A abordagem incremental permite transformar uma ideia conceitual em um protótipo funcional, documentado e tecnicamente fundamentado.
+
+---
+
+# FIM DO DOCUMENTO

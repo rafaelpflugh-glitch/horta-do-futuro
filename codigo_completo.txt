@@ -1,0 +1,2933 @@
+
+
+/// ================================= ///
+/// ARQUIVO: automacao.h
+/// ================================= ///
+
+#ifndef AUTOMACAO_H
+#define AUTOMACAO_H
+
+#include <Arduino.h>
+
+#include "config.h"
+#include "dados.h"
+#include "cultivo.h"
+#include "rtc.h"
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarAutomacao()
+{
+    pinMode(RELE_LUZ, OUTPUT);
+
+    pinMode(RELE_VENTILADOR, OUTPUT);
+
+    pinMode(RELE_BOMBA, OUTPUT);
+
+
+    digitalWrite(RELE_LUZ, LOW);
+
+    digitalWrite(RELE_VENTILADOR, LOW);
+
+    digitalWrite(RELE_BOMBA, LOW);
+
+
+    atuadores.luz = false;
+
+    atuadores.ventilador = false;
+
+    atuadores.aeracao = false;
+
+
+    Serial.println("Automacao inicializada.");
+}
+
+
+//=================================================
+// ILUMINAÇÃO
+//=================================================
+
+void controlarIluminacao()
+{
+    bool ligar = luzLigada();
+
+    atuadores.luz = ligar;
+
+    digitalWrite(
+        RELE_LUZ,
+        ligar ? HIGH : LOW
+    );
+}
+
+
+//=================================================
+// VENTILAÇÃO
+//=================================================
+
+void controlarVentilacao()
+{
+    bool ligar = false;
+
+
+    if(
+        ambiente.temperaturaAr >
+        cultivoAtual.temperaturaMax
+    )
+    {
+        ligar = true;
+    }
+
+
+    if(
+        ambiente.umidadeAr >
+        cultivoAtual.umidadeMax
+    )
+    {
+        ligar = true;
+    }
+
+
+    atuadores.ventilador = ligar;
+
+
+    digitalWrite(
+        RELE_VENTILADOR,
+        ligar ? HIGH : LOW
+    );
+}
+
+
+//=================================================
+// AERAÇÃO DWC
+//=================================================
+
+void controlarAeracao()
+{
+    /*
+        Na V1 a aeração representa:
+
+        bomba de ar
+             |
+          mangueira
+             |
+        pedra porosa
+             |
+        solução nutritiva
+
+        O controle inteligente da aeração
+        será desenvolvido posteriormente.
+
+        Por enquanto ela permanece ligada
+        quando o sistema está operacional.
+    */
+
+
+    bool ligar = solucao.nivelOK;
+
+
+    atuadores.aeracao = ligar;
+
+
+    digitalWrite(
+        RELE_BOMBA,
+        ligar ? HIGH : LOW
+    );
+}
+
+
+//=================================================
+// AUTOMAÇÃO COMPLETA
+//=================================================
+
+void atualizarAutomacao()
+{
+    controlarIluminacao();
+
+    controlarVentilacao();
+
+    controlarAeracao();
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: botoes.h
+/// ================================= ///
+
+#ifndef BOTOES_H
+#define BOTOES_H
+
+/*
+=================================================
+
+        HORTA DO FUTURO
+
+        BOTOES
+
+=================================================
+*/
+
+#include <Arduino.h>
+#include "config.h"
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarBotoes()
+{
+
+    pinMode(BTN_UP, INPUT_PULLUP);
+
+    pinMode(BTN_DOWN, INPUT_PULLUP);
+
+    pinMode(BTN_OK, INPUT_PULLUP);
+
+    Serial.println("Botoes inicializados.");
+
+}
+
+
+
+//=================================================
+// LEITURA
+//=================================================
+
+bool botaoCima()
+{
+
+    return digitalRead(BTN_UP) == LOW;
+
+}
+
+
+bool botaoBaixo()
+{
+
+    return digitalRead(BTN_DOWN) == LOW;
+
+}
+
+
+bool botaoOK()
+{
+
+    return digitalRead(BTN_OK) == LOW;
+
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: config.h
+/// ================================= ///
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+/*
+=================================================
+
+        HORTA DO FUTURO
+        CONFIGURAÇÃO GERAL
+
+        ESP32 DevKit V1
+
+=================================================
+*/
+
+
+//=================================================
+// OLED
+//=================================================
+
+#define OLED_SDA       21
+#define OLED_SCL       22
+#define OLED_ENDERECO  0x3C
+
+
+//=================================================
+// SENSORES
+//=================================================
+
+#define PINO_DHT       4
+#define PINO_DS18B20   5
+
+#define PINO_PH        34
+#define PINO_EC        35
+
+#define PINO_NIVEL     27
+
+
+//=================================================
+// BOTÕES
+//=================================================
+
+#define BTN_UP         32
+#define BTN_DOWN       33
+#define BTN_OK         25
+
+
+//=================================================
+// ATUADORES
+//=================================================
+
+#define RELE_LUZ          16
+#define RELE_VENTILADOR   17
+#define RELE_BOMBA        26
+
+
+//=================================================
+// RTC
+//=================================================
+
+#define RTC_SDA       21
+#define RTC_SCL       22
+
+
+//=================================================
+// CARTÃO SD
+//=================================================
+
+#define SD_CS         13
+#define SD_MOSI       23
+#define SD_MISO       19
+#define SD_SCK        18
+
+
+//=================================================
+// PARÂMETROS PADRÃO DA ALFACE
+//=================================================
+
+#define PH_MIN_PADRAO             5.5
+#define PH_MAX_PADRAO             6.5
+
+#define EC_MIN_PADRAO             1.0
+#define EC_MAX_PADRAO             1.8
+
+#define TEMPERATURA_MIN_PADRAO    18.0
+#define TEMPERATURA_MAX_PADRAO    26.0
+
+#define UMIDADE_MIN_PADRAO        50.0
+#define UMIDADE_MAX_PADRAO        80.0
+
+#define HORAS_LUZ_PADRAO          16
+
+
+//=================================================
+// CONTROLE DO SISTEMA
+//=================================================
+
+#define INTERVALO_CICLO           2000UL
+
+#define HORA_INICIO_LUZ           6
+
+
+//=================================================
+// SIMULAÇÃO
+//=================================================
+
+#define MODO_SIMULACAO            true
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: cultivo.h
+/// ================================= ///
+
+#ifndef CULTIVO_H
+#define CULTIVO_H
+
+#include <Arduino.h>
+#include "dados.h"
+
+
+//=================================================
+// ALFACE
+//=================================================
+
+Planta alface =
+{
+    "Alface",
+
+    5.5,
+    6.5,
+
+    1.0,
+    1.8,
+
+    18.0,
+    26.0,
+
+    50.0,
+    80.0,
+
+    16
+};
+
+
+//=================================================
+// MANJERICÃO
+//=================================================
+
+Planta manjericao =
+{
+    "Manjericao",
+
+    5.5,
+    6.8,
+
+    1.2,
+    2.0,
+
+    20.0,
+    30.0,
+
+    50.0,
+    80.0,
+
+    14
+};
+
+
+//=================================================
+// CARREGAR ALFACE
+//=================================================
+
+void carregarAlface()
+{
+    cultivoAtual = alface;
+}
+
+
+//=================================================
+// CARREGAR MANJERICÃO
+//=================================================
+
+void carregarManjericao()
+{
+    cultivoAtual = manjericao;
+}
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarCultivo()
+{
+    carregarAlface();
+
+    Serial.println("Cultivo selecionado: ALFACE");
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: dados.cpp
+/// ================================= ///
+
+#include <Arduino.h>
+
+#include "config.h"
+#include "dados.h"
+
+
+//=================================================
+// CULTIVO ATUAL
+//=================================================
+
+Planta cultivoAtual =
+{
+    "Alface",
+
+    PH_MIN_PADRAO,
+    PH_MAX_PADRAO,
+
+    EC_MIN_PADRAO,
+    EC_MAX_PADRAO,
+
+    TEMPERATURA_MIN_PADRAO,
+    TEMPERATURA_MAX_PADRAO,
+
+    UMIDADE_MIN_PADRAO,
+    UMIDADE_MAX_PADRAO,
+
+    HORAS_LUZ_PADRAO
+};
+
+
+//=================================================
+// AMBIENTE
+//=================================================
+
+Ambiente ambiente =
+{
+    0.0,
+    0.0
+};
+
+
+//=================================================
+// SOLUÇÃO
+//=================================================
+
+Solucao solucao =
+{
+    0.0,
+    0.0,
+    0.0,
+    false
+};
+
+
+//=================================================
+// ALERTAS
+//=================================================
+
+Alertas alertas =
+{
+    false,
+    false,
+
+    false,
+    false,
+
+    false,
+    false,
+
+    false,
+    false,
+
+    false
+};
+
+
+//=================================================
+// ATUADORES
+//=================================================
+
+Atuadores atuadores =
+{
+    false,
+    false,
+    false
+};
+
+
+//=================================================
+// MENSAGEM DO SISTEMA
+//=================================================
+
+String mensagemSistema = "Sistema OK";
+
+
+//=================================================
+// SAÚDE DO CULTIVO
+//=================================================
+
+int saudeCultivo = 0;
+
+
+/// ================================= ///
+/// ARQUIVO: dados.h
+/// ================================= ///
+
+#ifndef DADOS_H
+#define DADOS_H
+
+#include <Arduino.h>
+
+//=================================================
+// PERFIL DA PLANTA
+//=================================================
+
+struct Planta
+{
+    String nome;
+
+    float phMin;
+    float phMax;
+
+    float ecMin;
+    float ecMax;
+
+    float temperaturaMin;
+    float temperaturaMax;
+
+    float umidadeMin;
+    float umidadeMax;
+
+    int horasLuz;
+};
+
+
+//=================================================
+// AMBIENTE
+//=================================================
+
+struct Ambiente
+{
+    float temperaturaAr;
+    float umidadeAr;
+};
+
+
+//=================================================
+// SOLUÇÃO NUTRITIVA
+//=================================================
+
+struct Solucao
+{
+    float temperaturaAgua;
+
+    float ph;
+
+    float ec;
+
+    bool nivelOK;
+};
+
+
+//=================================================
+// ALERTAS
+//=================================================
+
+struct Alertas
+{
+    bool phBaixo;
+    bool phAlto;
+
+    bool ecBaixo;
+    bool ecAlto;
+
+    bool temperaturaBaixa;
+    bool temperaturaAlta;
+
+    bool umidadeBaixa;
+    bool umidadeAlta;
+
+    bool nivelBaixo;
+};
+
+
+//=================================================
+// ATUADORES
+//=================================================
+
+struct Atuadores
+{
+    bool luz;
+    bool ventilador;
+    bool aeracao;
+};
+
+
+//=================================================
+// VARIÁVEIS GLOBAIS
+//=================================================
+
+extern Planta cultivoAtual;
+
+extern Ambiente ambiente;
+
+extern Solucao solucao;
+
+extern Alertas alertas;
+
+extern Atuadores atuadores;
+
+extern String mensagemSistema;
+
+extern int saudeCultivo;
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: diagnostico.h
+/// ================================= ///
+
+#ifndef DIAGNOSTICO_H
+#define DIAGNOSTICO_H
+
+#include <Arduino.h>
+
+#include "dados.h"
+#include "cultivo.h"
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarDiagnostico()
+{
+    Serial.println("Diagnostico inicializado.");
+
+    limparAlertas();
+}
+
+
+//=================================================
+// LIMPAR ALERTAS
+//=================================================
+
+void limparAlertas()
+{
+    alertas.phBaixo = false;
+    alertas.phAlto = false;
+
+    alertas.ecBaixo = false;
+    alertas.ecAlto = false;
+
+    alertas.temperaturaBaixa = false;
+    alertas.temperaturaAlta = false;
+
+    alertas.umidadeBaixa = false;
+    alertas.umidadeAlta = false;
+
+    alertas.nivelBaixo = false;
+}
+
+
+//=================================================
+// pH
+//=================================================
+
+void diagnosticarPH()
+{
+    if(solucao.ph < cultivoAtual.phMin)
+        alertas.phBaixo = true;
+
+    if(solucao.ph > cultivoAtual.phMax)
+        alertas.phAlto = true;
+}
+
+
+//=================================================
+// EC
+//=================================================
+
+void diagnosticarEC()
+{
+    if(solucao.ec < cultivoAtual.ecMin)
+        alertas.ecBaixo = true;
+
+    if(solucao.ec > cultivoAtual.ecMax)
+        alertas.ecAlto = true;
+}
+
+
+//=================================================
+// TEMPERATURA
+//=================================================
+
+void diagnosticarTemperatura()
+{
+    if(
+        ambiente.temperaturaAr <
+        cultivoAtual.temperaturaMin
+    )
+    {
+        alertas.temperaturaBaixa = true;
+    }
+
+    if(
+        ambiente.temperaturaAr >
+        cultivoAtual.temperaturaMax
+    )
+    {
+        alertas.temperaturaAlta = true;
+    }
+}
+
+
+//=================================================
+// UMIDADE
+//=================================================
+
+void diagnosticarUmidade()
+{
+    if(
+        ambiente.umidadeAr <
+        cultivoAtual.umidadeMin
+    )
+    {
+        alertas.umidadeBaixa = true;
+    }
+
+    if(
+        ambiente.umidadeAr >
+        cultivoAtual.umidadeMax
+    )
+    {
+        alertas.umidadeAlta = true;
+    }
+}
+
+
+//=================================================
+// NÍVEL
+//=================================================
+
+void diagnosticarNivel()
+{
+    if(!solucao.nivelOK)
+        alertas.nivelBaixo = true;
+}
+
+
+//=================================================
+// SAÚDE
+//=================================================
+
+void calcularSaude()
+{
+    int pontos = 100;
+
+
+    if(
+        alertas.phBaixo ||
+        alertas.phAlto
+    )
+    {
+        pontos -= 20;
+    }
+
+
+    if(
+        alertas.ecBaixo ||
+        alertas.ecAlto
+    )
+    {
+        pontos -= 20;
+    }
+
+
+    if(
+        alertas.temperaturaBaixa ||
+        alertas.temperaturaAlta
+    )
+    {
+        pontos -= 20;
+    }
+
+
+    if(
+        alertas.umidadeBaixa ||
+        alertas.umidadeAlta
+    )
+    {
+        pontos -= 15;
+    }
+
+
+    if(alertas.nivelBaixo)
+    {
+        pontos -= 25;
+    }
+
+
+    if(pontos < 0)
+        pontos = 0;
+
+
+    saudeCultivo = pontos;
+}
+
+
+//=================================================
+// DIAGNÓSTICO COMPLETO
+//=================================================
+
+void atualizarDiagnostico()
+{
+    limparAlertas();
+
+    diagnosticarPH();
+
+    diagnosticarEC();
+
+    diagnosticarTemperatura();
+
+    diagnosticarUmidade();
+
+    diagnosticarNivel();
+
+    calcularSaude();
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: display.h
+/// ================================= ///
+
+#ifndef DISPLAY_H
+#define DISPLAY_H
+
+#include <Wire.h>
+
+#include <Adafruit_GFX.h>
+
+#include <Adafruit_SSD1306.h>
+
+
+#include "config.h"
+
+#include "dados.h"
+
+#include "cultivo.h"
+
+#include "rtc.h"
+
+
+//=================================================
+// OLED
+//=================================================
+
+Adafruit_SSD1306 tela(
+    128,
+    64,
+    &Wire,
+    -1
+);
+
+
+//=================================================
+// TELAS
+//=================================================
+
+int telaAtual = 0;
+
+const int TOTAL_TELAS = 5;
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarDisplay()
+{
+    Wire.begin(
+        OLED_SDA,
+        OLED_SCL
+    );
+
+
+    if(
+        !tela.begin(
+            SSD1306_SWITCHCAPVCC,
+            OLED_ENDERECO
+        )
+    )
+    {
+        Serial.println(
+            "ERRO: OLED nao encontrado."
+        );
+
+        return;
+    }
+
+
+    tela.clearDisplay();
+
+    tela.setTextColor(
+        SSD1306_WHITE
+    );
+
+    tela.display();
+
+
+    Serial.println(
+        "Display inicializado."
+    );
+}
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void mostrarInicializacao()
+{
+    tela.clearDisplay();
+
+
+    tela.setTextSize(2);
+
+
+    tela.setCursor(8, 8);
+
+    tela.println("HORTA");
+
+
+    tela.setCursor(8, 30);
+
+    tela.println("FUTURO");
+
+
+    tela.setTextSize(1);
+
+
+    tela.setCursor(20, 56);
+
+    tela.println("Firmware V1.0");
+
+
+    tela.display();
+}
+
+
+//=================================================
+// TELA PRINCIPAL
+//=================================================
+
+void telaPrincipal()
+{
+    tela.clearDisplay();
+
+
+    tela.setTextSize(1);
+
+
+    tela.setCursor(0, 0);
+
+    tela.print("Cultivo: ");
+
+    tela.println(
+        cultivoAtual.nome
+    );
+
+
+    tela.setCursor(0, 12);
+
+    tela.print("Condicao: ");
+
+    tela.print(
+        saudeCultivo
+    );
+
+    tela.println("%");
+
+
+    tela.setCursor(0, 24);
+
+    tela.print("Hora: ");
+
+    tela.println(
+        obterHora()
+    );
+
+
+    tela.setCursor(0, 36);
+
+    tela.print("Luz: ");
+
+    tela.println(
+        atuadores.luz ?
+        "ON" :
+        "OFF"
+    );
+
+
+    tela.setCursor(0, 48);
+
+    tela.print("Bomba: ");
+
+    tela.println(
+        atuadores.bomba ?
+        "ON" :
+        "OFF"
+    );
+
+
+    tela.display();
+}
+
+
+//=================================================
+// AMBIENTE
+//=================================================
+
+void telaAmbiente()
+{
+    tela.clearDisplay();
+
+
+    tela.setCursor(0, 0);
+
+    tela.println("AMBIENTE");
+
+
+    tela.setCursor(0, 18);
+
+    tela.print("Temp: ");
+
+    tela.print(
+        ambiente.temperaturaAr,
+        1
+    );
+
+    tela.println(" C");
+
+
+    tela.setCursor(0, 34);
+
+    tela.print("Umid: ");
+
+    tela.print(
+        ambiente.umidadeAr,
+        1
+    );
+
+    tela.println("%");
+
+
+    tela.setCursor(0, 50);
+
+    tela.print("Vent: ");
+
+    tela.println(
+        atuadores.ventilador ?
+        "ON" :
+        "OFF"
+    );
+
+
+    tela.display();
+}
+
+
+//=================================================
+// SOLUÇÃO
+//=================================================
+
+void telaSolucao()
+{
+    tela.clearDisplay();
+
+
+    tela.setCursor(0, 0);
+
+    tela.println("SOLUCAO");
+
+
+    tela.setCursor(0, 14);
+
+    tela.print("Agua: ");
+
+    tela.print(
+        solucao.temperaturaAgua,
+        1
+    );
+
+    tela.println(" C");
+
+
+    tela.setCursor(0, 28);
+
+    tela.print("pH: ");
+
+    tela.println(
+        solucao.ph,
+        2
+    );
+
+
+    tela.setCursor(0, 42);
+
+    tela.print("EC: ");
+
+    tela.println(
+        solucao.ec,
+        2
+    );
+
+
+    tela.display();
+}
+
+
+//=================================================
+// ALERTAS
+//=================================================
+
+void telaAlertas()
+{
+    tela.clearDisplay();
+
+
+    tela.setCursor(0, 0);
+
+    tela.println("ALERTAS");
+
+
+    int linha = 14;
+
+
+    if(alertas.phBaixo)
+    {
+        tela.setCursor(0, linha);
+
+        tela.println("PH BAIXO");
+
+        linha += 10;
+    }
+
+
+    if(alertas.phAlto)
+    {
+        tela.setCursor(0, linha);
+
+        tela.println("PH ALTO");
+
+        linha += 10;
+    }
+
+
+    if(alertas.ecBaixo)
+    {
+        tela.setCursor(0, linha);
+
+        tela.println("EC BAIXO");
+
+        linha += 10;
+    }
+
+
+    if(alertas.ecAlto)
+    {
+        tela.setCursor(0, linha);
+
+        tela.println("EC ALTO");
+
+        linha += 10;
+    }
+
+
+    if(alertas.temperaturaAlta)
+    {
+        tela.setCursor(0, linha);
+
+        tela.println("TEMP ALTA");
+
+        linha += 10;
+    }
+
+
+    if(alertas.umidadeAlta)
+    {
+        tela.setCursor(0, linha);
+
+        tela.println("UMID ALTA");
+
+        linha += 10;
+    }
+
+
+    if(alertas.nivelBaixo)
+    {
+        tela.setCursor(0, linha);
+
+        tela.println("NIVEL BAIXO");
+
+        linha += 10;
+    }
+
+
+    if(
+        !alertas.phBaixo &&
+        !alertas.phAlto &&
+        !alertas.ecBaixo &&
+        !alertas.ecAlto &&
+        !alertas.temperaturaBaixa &&
+        !alertas.temperaturaAlta &&
+        !alertas.umidadeBaixa &&
+        !alertas.umidadeAlta &&
+        !alertas.nivelBaixo
+    )
+    {
+        tela.setCursor(0, 24);
+
+        tela.println("SEM ALERTAS");
+    }
+
+
+    tela.display();
+}
+
+
+//=================================================
+// SISTEMA
+//=================================================
+
+void telaSistema()
+{
+    tela.clearDisplay();
+
+
+    tela.setCursor(0, 0);
+
+    tela.println("SISTEMA");
+
+
+    tela.setCursor(0, 16);
+
+    tela.print("Planta: ");
+
+    tela.println(
+        cultivoAtual.nome
+    );
+
+
+    tela.setCursor(0, 30);
+
+    tela.print("Luz: ");
+
+    tela.println(
+        cultivoAtual.horasLuz
+    );
+
+
+    tela.setCursor(0, 44);
+
+    tela.print("Nivel: ");
+
+    tela.println(
+        solucao.nivelOK ?
+        "OK" :
+        "BAIXO"
+    );
+
+
+    tela.display();
+}
+
+
+//=================================================
+// ATUALIZA DISPLAY
+//=================================================
+
+void atualizarDisplay()
+{
+    switch(telaAtual)
+    {
+        case 0:
+            telaPrincipal();
+            break;
+
+        case 1:
+            telaAmbiente();
+            break;
+
+        case 2:
+            telaSolucao();
+            break;
+
+        case 3:
+            telaAlertas();
+            break;
+
+        case 4:
+            telaSistema();
+            break;
+    }
+}
+
+
+//=================================================
+// PRÓXIMA
+//=================================================
+
+void proximaTela()
+{
+    telaAtual++;
+
+
+    if(
+        telaAtual >= TOTAL_TELAS
+    )
+    {
+        telaAtual = 0;
+    }
+}
+
+
+//=================================================
+// ANTERIOR
+//=================================================
+
+void telaAnterior()
+{
+    telaAtual--;
+
+
+    if(telaAtual < 0)
+    {
+        telaAtual =
+            TOTAL_TELAS - 1;
+    }
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: estados.cpp
+/// ================================= ///
+
+#include "estados.h"
+
+
+
+EstadoSistema estadoAtual = INICIALIZACAO;
+
+
+
+void atualizarEstado()
+{
+
+    switch(estadoAtual)
+    {
+
+
+        case INICIALIZACAO:
+
+            estadoAtual = MONITORAMENTO;
+
+        break;
+
+
+
+        case MONITORAMENTO:
+
+        break;
+
+
+
+        default:
+
+        break;
+
+
+    }
+
+}
+
+
+/// ================================= ///
+/// ARQUIVO: estados.h
+/// ================================= ///
+
+#ifndef ESTADOS_H
+#define ESTADOS_H
+
+
+enum EstadoSistema
+{
+    INICIALIZACAO,
+
+    MONITORAMENTO,
+
+    MENU_PRINCIPAL,
+
+    MENU_CULTIVOS,
+
+    MENU_CONFIGURACOES,
+
+    MENU_HISTORICO,
+
+    MENU_SISTEMA
+};
+
+
+extern EstadoSistema estadoAtual;
+
+
+void atualizarEstado();
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: fotoperiodo.h
+/// ================================= ///
+
+#ifndef FOTOPERIODO_H
+#define FOTOPERIODO_H
+
+
+
+/*
+=================================================
+
+FOTOPERÍODO
+
+Controle do ciclo da luz.
+
+=================================================
+*/
+
+
+
+enum FaseCultivo
+{
+
+VEGETATIVO,
+
+FLORACAO,
+
+PERSONALIZADO
+
+};
+
+
+
+FaseCultivo faseAtual =
+VEGETATIVO;
+
+
+
+int horasLuz;
+
+
+
+void configurarFotoperiodo()
+{
+
+
+switch(faseAtual)
+{
+
+
+case VEGETATIVO:
+
+
+horasLuz = 16;
+
+break;
+
+
+
+case FLORACAO:
+
+
+horasLuz = 12;
+
+break;
+
+
+
+case PERSONALIZADO:
+
+
+horasLuz = 14;
+
+break;
+
+
+
+}
+
+
+
+}
+
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: HORTA_DO_FUTURO_V01.ino
+/// ================================= ///
+
+/*
+=====================================================
+
+              HORTA DO FUTURO
+
+        COMPUTADOR DE PLANTAS
+
+        Firmware V1.0
+
+        ESP32 DevKit V1
+
+=====================================================
+*/
+
+#include "sistema.h"
+
+#include "display.h"
+
+#include "menu.h"
+
+
+//=====================================================
+// CONTROLE DE TEMPO
+//=====================================================
+
+unsigned long ultimoCiclo = 0;
+
+
+//=====================================================
+// SETUP
+//=====================================================
+
+void setup()
+{
+    Serial.begin(115200);
+
+    delay(500);
+
+
+    Serial.println();
+
+    Serial.println("================================");
+    Serial.println("        HORTA DO FUTURO");
+    Serial.println("      COMPUTADOR DE PLANTAS");
+    Serial.println("          Firmware V1.0");
+    Serial.println("================================");
+
+
+    //=============================================
+    // SISTEMA
+    //=============================================
+
+    iniciarSistema();
+
+
+    //=============================================
+    // OLED
+    //=============================================
+
+    iniciarDisplay();
+
+
+    //=============================================
+    // TELA INICIAL
+    //=============================================
+
+    mostrarInicializacao();
+
+
+    delay(1500);
+
+
+    //=============================================
+    // MONITORAMENTO
+    //=============================================
+
+    estadoAtual = MONITORAMENTO;
+}
+
+
+//=====================================================
+// LOOP
+//=====================================================
+
+void loop()
+{
+    unsigned long agora = millis();
+
+
+    //=============================================
+    // CICLO DE MONITORAMENTO
+    //=============================================
+
+    if(
+        agora - ultimoCiclo >=
+        INTERVALO_CICLO
+    )
+    {
+        ultimoCiclo = agora;
+
+        executarCiclo();
+    }
+
+
+    //=============================================
+    // INTERFACE
+    //=============================================
+
+    atualizarInterface();
+
+
+    //=============================================
+    // MENU
+    //=============================================
+
+    atualizarMenu();
+}
+
+
+/// ================================= ///
+/// ARQUIVO: memoria_sd.h
+/// ================================= ///
+
+#ifndef MEMORIA_SD_H
+#define MEMORIA_SD_H
+
+#include <Arduino.h>
+
+#include "config.h"
+#include "dados.h"
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarMemoria()
+{
+    /*
+        FUTURO:
+
+        SD.begin(SD_CS)
+    */
+
+    Serial.println("Memoria SD preparada.");
+}
+
+
+//=================================================
+// REGISTRO
+//=================================================
+
+void registrarDados()
+{
+    /*
+        FUTURO:
+
+        CSV:
+
+        data
+        hora
+        temperatura_ar
+        umidade_ar
+        temperatura_agua
+        ph
+        ec
+        nivel
+        saude
+    */
+
+    Serial.println("Dados registrados.");
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: menu.h
+/// ================================= ///
+
+#ifndef MENU_H
+#define MENU_H
+
+#include <Arduino.h>
+
+#include "estados.h"
+
+#include "display.h"
+
+#include "botoes.h"
+
+
+//=================================================
+// MENU
+//=================================================
+
+int opcaoMenu = 0;
+
+const int totalOpcoes = 5;
+
+
+String opcoesMenu[] =
+{
+    "Monitoramento",
+    "Cultivos",
+    "Configuracoes",
+    "Historico",
+    "Sistema"
+};
+
+
+//=================================================
+// MOSTRA MENU
+//=================================================
+
+void mostrarMenu()
+{
+    tela.clearDisplay();
+
+    tela.setTextSize(1);
+
+    tela.setCursor(0, 0);
+
+    tela.println("MENU PRINCIPAL");
+
+
+    for(
+        int i = 0;
+        i < totalOpcoes;
+        i++
+    )
+    {
+        tela.setCursor(
+            0,
+            14 + (i * 10)
+        );
+
+
+        if(i == opcaoMenu)
+            tela.print("> ");
+        else
+            tela.print("  ");
+
+
+        tela.println(
+            opcoesMenu[i]
+        );
+    }
+
+
+    tela.display();
+}
+
+
+//=================================================
+// CIMA
+//=================================================
+
+void menuCima()
+{
+    opcaoMenu--;
+
+
+    if(opcaoMenu < 0)
+        opcaoMenu =
+            totalOpcoes - 1;
+}
+
+
+//=================================================
+// BAIXO
+//=================================================
+
+void menuBaixo()
+{
+    opcaoMenu++;
+
+
+    if(
+        opcaoMenu >= totalOpcoes
+    )
+    {
+        opcaoMenu = 0;
+    }
+}
+
+
+//=================================================
+// SELECIONAR
+//=================================================
+
+void selecionarMenu()
+{
+    switch(opcaoMenu)
+    {
+        case 0:
+            estadoAtual =
+                MONITORAMENTO;
+            break;
+
+        case 1:
+            estadoAtual =
+                MENU_CULTIVOS;
+            break;
+
+        case 2:
+            estadoAtual =
+                MENU_CONFIGURACOES;
+            break;
+
+        case 3:
+            estadoAtual =
+                MENU_HISTORICO;
+            break;
+
+        case 4:
+            estadoAtual =
+                MENU_SISTEMA;
+            break;
+    }
+}
+
+
+//=================================================
+// VOLTAR
+//=================================================
+
+void voltarMenu()
+{
+    estadoAtual =
+        MENU_PRINCIPAL;
+}
+
+
+//=================================================
+// ATUALIZAÇÃO
+//=================================================
+
+void atualizarMenu()
+{
+    /*
+        Por enquanto a interface
+        principal utiliza as telas.
+
+        Os botões serão integrados
+        progressivamente.
+    */
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: rtc.h
+/// ================================= ///
+
+#ifndef RTC_H
+#define RTC_H
+
+#include <Arduino.h>
+
+#include "config.h"
+#include "cultivo.h"
+
+
+//=================================================
+// DATA E HORA
+//=================================================
+
+int horaAtual = 12;
+int minutoAtual = 0;
+int segundoAtual = 0;
+
+int diaAtual = 1;
+int mesAtual = 1;
+int anoAtual = 2026;
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarRTC()
+{
+    Serial.println("RTC inicializado.");
+}
+
+
+//=================================================
+// ATUALIZA RTC
+//=================================================
+
+void atualizarRTC()
+{
+    /*
+        FUTURO:
+
+        DS3231
+    */
+}
+
+
+//=================================================
+// OBTÉM HORA
+//=================================================
+
+String obterHora()
+{
+    char texto[9];
+
+    sprintf(
+        texto,
+        "%02d:%02d:%02d",
+        horaAtual,
+        minutoAtual,
+        segundoAtual
+    );
+
+    return String(texto);
+}
+
+
+//=================================================
+// OBTÉM DATA
+//=================================================
+
+String obterData()
+{
+    char texto[11];
+
+    sprintf(
+        texto,
+        "%02d/%02d/%04d",
+        diaAtual,
+        mesAtual,
+        anoAtual
+    );
+
+    return String(texto);
+}
+
+
+//=================================================
+// FOTOPERÍODO
+//=================================================
+
+bool luzLigada()
+{
+    int horaLiga = HORA_INICIO_LUZ;
+
+    int horaDesliga =
+        horaLiga + cultivoAtual.horasLuz;
+
+    if(horaDesliga < 24)
+    {
+        return
+        (
+            horaAtual >= horaLiga &&
+            horaAtual < horaDesliga
+        );
+    }
+
+    return
+    (
+        horaAtual >= horaLiga ||
+        horaAtual < (horaDesliga - 24)
+    );
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: saude.h
+/// ================================= ///
+
+#ifndef SAUDE_H
+#define SAUDE_H
+
+
+
+#include "dados.h"
+#include "cultivo.h"
+
+
+
+/*
+=================================================
+
+ÍNDICE DE SAÚDE
+
+Cálculo:
+
+Temperatura 30%
+pH           30%
+EC           20%
+Nível água   20%
+
+=================================================
+*/
+
+
+
+float avaliarTemperatura()
+{
+
+
+if(
+ambiente.temperaturaAr >= cultivoAtual.temperaturaMin
+&&
+ambiente.temperaturaAr <= cultivoAtual.temperaturaMax
+)
+
+{
+
+return 100;
+
+}
+
+else
+
+{
+
+return 50;
+
+}
+
+
+
+}
+
+
+
+float avaliarPH()
+{
+
+
+if(
+ambiente.ph >= cultivoAtual.phMin
+&&
+ambiente.ph <= cultivoAtual.phMax
+)
+
+{
+
+return 100;
+
+}
+
+else
+
+{
+
+return 50;
+
+}
+
+
+}
+
+
+
+float avaliarNivel()
+{
+
+
+if(ambiente.nivelAgua)
+
+return 100;
+
+
+else
+
+return 0;
+
+
+}
+
+
+
+
+void calcularSaude()
+{
+
+
+float resultado;
+
+
+
+resultado =
+(
+avaliarTemperatura()*0.30
++
+avaliarPH()*0.30
++
+90*0.20
++
+avaliarNivel()*0.20
+);
+
+
+
+indiceSaude =
+(int)resultado;
+
+
+
+}
+
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: sensores.h
+/// ================================= ///
+
+#ifndef SENSORES_H
+#define SENSORES_H
+
+#include <Arduino.h>
+
+#include "config.h"
+#include "dados.h"
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarSensores()
+{
+    Serial.println("Inicializando sensores...");
+
+#if MODO_SIMULACAO
+
+    Serial.println("Modo simulacao ativo.");
+    Serial.println("Sensores reais nao serao inicializados.");
+
+#else
+
+    // Futuramente:
+    //
+    // iniciarSensorTemperatura();
+    // iniciarSensorPH();
+    // iniciarSensorEC();
+    // iniciarSensorNivel();
+    // iniciarSensorLuminosidade();
+    // iniciarSensorAeracao();
+
+#endif
+
+    Serial.println("Sensores inicializados.");
+}
+
+
+//=================================================
+// LEITURA DOS SENSORES
+//=================================================
+
+void atualizarSensores()
+{
+
+#if MODO_SIMULACAO
+
+    ambiente.temperaturaAr = 24.5;
+
+    ambiente.umidadeAr = 62.0;
+
+
+    solucao.temperaturaAgua = 22.3;
+
+    solucao.ph = 6.1;
+
+    solucao.ec = 1.4;
+
+    solucao.nivelOK = true;
+
+
+#else
+
+    // Futuramente:
+
+    // lerTemperatura();
+    // lerPH();
+    // lerEC();
+    // lerNivel();
+    // lerLuminosidade();
+    // lerAeracao();
+
+#endif
+}
+
+
+//=================================================
+// DEBUG
+//=================================================
+
+void mostrarDadosSensores()
+{
+    Serial.println();
+    Serial.println("------ LEITURAS ------");
+
+    Serial.print("Temperatura ar: ");
+    Serial.print(ambiente.temperaturaAr);
+    Serial.println(" C");
+
+    Serial.print("Umidade ar: ");
+    Serial.print(ambiente.umidadeAr);
+    Serial.println(" %");
+
+    Serial.print("Temperatura agua: ");
+    Serial.print(solucao.temperaturaAgua);
+    Serial.println(" C");
+
+    Serial.print("pH: ");
+    Serial.println(solucao.ph);
+
+    Serial.print("EC: ");
+    Serial.println(solucao.ec);
+
+    Serial.print("Nivel: ");
+    Serial.println(
+        solucao.nivelOK ? "OK" : "BAIXO"
+    );
+
+    Serial.println("----------------------");
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: sensor_ec.h
+/// ================================= ///
+
+#ifndef SENSOR_EC_H
+#define SENSOR_EC_H
+
+
+/*
+====================================================
+
+HORTA DO FUTURO
+
+MÓDULO EC/TDS
+
+Mede concentração
+da solução nutritiva.
+
+
+====================================================
+*/
+
+
+#include "config.h"
+#include "dados.h"
+
+
+
+void iniciarSensorEC()
+{
+
+
+Serial.println(
+"Sensor EC preparado."
+);
+
+
+}
+
+
+
+void lerEC()
+{
+
+
+valorEC = 1.4;
+
+
+}
+
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: sensor_nivel.h
+/// ================================= ///
+
+#ifndef SENSOR_NIVEL_H
+#define SENSOR_NIVEL_H
+
+
+/*
+====================================================
+
+HORTA DO FUTURO
+
+SENSOR DE NÍVEL
+
+
+Sensor:
+XKC-Y25
+
+
+====================================================
+*/
+
+
+#include "config.h"
+#include "dados.h"
+
+
+
+void iniciarSensorNivel()
+{
+
+
+pinMode(
+PINO_NIVEL,
+INPUT
+);
+
+
+Serial.println(
+"Sensor de nivel preparado."
+);
+
+
+}
+
+
+
+void lerNivel()
+{
+
+
+int estado = digitalRead(PINO_NIVEL);
+
+
+if(estado == HIGH)
+{
+
+nivelAguaOK = true;
+
+}
+else
+{
+
+nivelAguaOK = false;
+
+}
+
+
+}
+
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: sensor_ph.h
+/// ================================= ///
+
+#ifndef SENSOR_PH_H
+#define SENSOR_PH_H
+
+
+/*
+====================================================
+
+HORTA DO FUTURO
+
+MÓDULO SENSOR DE pH
+
+Responsável pela leitura
+da solução nutritiva.
+
+Sensor futuro:
+PH-4502C ou similar
+
+
+====================================================
+*/
+
+
+#include "config.h"
+#include "dados.h"
+
+
+
+void iniciarSensorPH()
+{
+
+Serial.println(
+"Sensor pH preparado."
+);
+
+
+}
+
+
+
+void lerPH()
+{
+
+
+/*
+
+Leitura futura:
+
+analogRead(PINO_PH)
+
+
+Por enquanto:
+
+mantém valor seguro
+para testes do sistema.
+
+
+*/
+
+
+valorPH = 6.0;
+
+
+
+}
+
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: sensor_temperatura.h
+/// ================================= ///
+
+#ifndef SENSOR_TEMPERATURA_H
+#define SENSOR_TEMPERATURA_H
+
+
+
+#include "config.h"
+
+#include "dados.h"
+
+
+
+#include <DHT.h>
+
+#include <OneWire.h>
+
+#include <DallasTemperature.h>
+
+
+
+
+
+// ==============================
+// DHT22
+// ==============================
+
+
+#define TIPO_DHT DHT22
+
+
+DHT dht(
+PINO_DHT,
+TIPO_DHT
+);
+
+
+
+
+// ==============================
+// DS18B20
+// ==============================
+
+
+OneWire barramentoTemperatura(
+PINO_DS18B20
+);
+
+
+DallasTemperature sensorAgua(
+&barramentoTemperatura
+);
+
+
+
+
+
+void iniciarSensoresTemperatura()
+{
+
+
+dht.begin();
+
+
+sensorAgua.begin();
+
+
+Serial.println(
+"Sensores temperatura OK"
+);
+
+
+
+}
+
+
+
+
+
+
+void lerTemperatura()
+{
+
+
+/*
+
+Leitura do ar
+
+*/
+
+float temperatura =
+dht.readTemperature();
+
+
+
+float umidade =
+dht.readHumidity();
+
+
+
+
+
+if(
+!isnan(temperatura)
+)
+
+{
+
+sensores.temperaturaAr =
+temperatura;
+
+}
+
+
+
+if(
+!isnan(umidade)
+)
+
+{
+
+sensores.umidadeAr =
+umidade;
+
+}
+
+
+
+
+
+/*
+
+Leitura água
+
+*/
+
+sensorAgua.requestTemperatures();
+
+
+
+sensores.temperaturaAgua =
+sensorAgua.getTempCByIndex(0);
+
+
+
+
+Serial.print(
+"Temperatura ar: "
+);
+
+
+Serial.println(
+sensores.temperaturaAr
+);
+
+
+
+}
+
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: simulacao.h
+/// ================================= ///
+
+#ifndef SIMULACAO_H
+#define SIMULACAO_H
+
+#include "config.h"
+#include "dados.h"
+
+
+//=================================================
+// SIMULAÇÃO
+//=================================================
+
+void simularSensores()
+{
+#if MODO_SIMULACAO
+
+    ambiente.temperaturaAr = 24.5;
+
+    ambiente.umidadeAr = 62.0;
+
+    solucao.temperaturaAgua = 22.3;
+
+    solucao.ph = 6.1;
+
+    solucao.ec = 1.4;
+
+    solucao.nivelOK = true;
+
+#endif
+}
+
+
+//=================================================
+// VARIAÇÃO DA SIMULAÇÃO
+//=================================================
+
+void variarSimulacao()
+{
+#if MODO_SIMULACAO
+
+    /*
+        Pequena variação para permitir
+        testar o sistema futuramente.
+    */
+
+#endif
+}
+
+
+#endif
+
+
+/// ================================= ///
+/// ARQUIVO: sistema.h
+/// ================================= ///
+
+#ifndef SISTEMA_H
+#define SISTEMA_H
+
+
+#include <Arduino.h>
+
+
+#include "config.h"
+#include "dados.h"
+#include "cultivo.h"
+#include "rtc.h"
+#include "fotoperiodo.h"
+#include "sensores.h"
+#include "diagnostico.h"
+#include "automacao.h"
+#include "botoes.h"
+#include "estados.h"
+#include "memoria_sd.h"
+#include "display.h"
+#include "menu.h"
+
+
+//=================================================
+// INICIALIZAÇÃO
+//=================================================
+
+void iniciarSistema()
+{
+    Serial.println();
+    Serial.println("=================================");
+    Serial.println("       HORTA DO FUTURO");
+    Serial.println("       INICIALIZANDO...");
+    Serial.println("=================================");
+
+
+    //=============================================
+    // CULTIVO
+    //=============================================
+
+    iniciarCultivo();
+
+
+    //=============================================
+    // RTC
+    //=============================================
+
+    iniciarRTC();
+
+
+    //=============================================
+    // FOTOPERÍODO
+    //=============================================
+
+    configurarFotoperiodo();
+
+
+    //=============================================
+    // SENSORES
+    //=============================================
+
+    iniciarSensores();
+
+
+    //=============================================
+    // BOTÕES
+    //=============================================
+
+    iniciarBotoes();
+
+
+    //=============================================
+    // DIAGNÓSTICO
+    //=============================================
+
+    iniciarDiagnostico();
+
+
+    //=============================================
+    // AUTOMAÇÃO
+    //=============================================
+
+    iniciarAutomacao();
+
+
+    //=============================================
+    // MEMÓRIA
+    //=============================================
+
+    iniciarMemoria();
+
+
+    //=============================================
+    // ESTADO
+    //=============================================
+
+    estadoAtual = INICIALIZACAO;
+
+
+    Serial.println();
+    Serial.println("=================================");
+    Serial.println("       SISTEMA INICIALIZADO");
+    Serial.println("=================================");
+    Serial.println();
+}
+
+
+//=================================================
+// CICLO PRINCIPAL
+//=================================================
+
+void executarCiclo()
+{
+    Serial.println();
+    Serial.println("=================================");
+    Serial.println("     NOVO CICLO DE MONITORAMENTO");
+    Serial.println("=================================");
+
+
+    //=============================================
+    // 1. LEITURA
+    //=============================================
+
+    atualizarSensores();
+
+
+    //=============================================
+    // 2. DIAGNÓSTICO
+    //=============================================
+
+    atualizarDiagnostico();
+
+
+    //=============================================
+    // 3. AUTOMAÇÃO
+    //=============================================
+
+    atualizarAutomacao();
+
+
+    //=============================================
+    // 4. MEMÓRIA
+    //=============================================
+
+    registrarDados();
+
+
+    //=============================================
+    // 5. DEBUG
+    //=============================================
+
+    mostrarDadosSensores();
+
+
+    Serial.print("Saude do cultivo: ");
+    Serial.print(saudeCultivo);
+    Serial.println("%");
+
+
+    Serial.println("=================================");
+}
+
+
+//=================================================
+// INTERFACE
+//=================================================
+
+void atualizarInterface()
+{
+    switch(estadoAtual)
+    {
+
+        case INICIALIZACAO:
+
+            mostrarInicializacao();
+
+            estadoAtual = MONITORAMENTO;
+
+            break;
+
+
+        case MONITORAMENTO:
+
+            atualizarDisplay();
+
+            break;
+
+
+        case MENU_PRINCIPAL:
+
+            mostrarMenu();
+
+            break;
+
+
+        default:
+
+            atualizarDisplay();
+
+            break;
+    }
+}
+
+
+#endif

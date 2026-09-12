@@ -1,0 +1,450 @@
+# HORTA DO FUTURO
+
+## Um Computador de Plantas para Cultivo Hidropônico Inteligente
+
+### Sistema de Monitoramento Agrícola Inteligente para Ambientes Controlados Aplicado à Agricultura Urbana e Pequenos Produtores
+
+
+---
+
+# 1. IDENTIFICAÇÃO DO PROJETO
+
+
+## Nome do Projeto
+
+HORTA DO FUTURO
+
+
+## Categoria
+
+Sistema embarcado de monitoramento e automação agrícola.
+
+
+## Área de aplicação
+
+- Agricultura urbana;
+- Hidroponia;
+- Ambientes controlados;
+- Pequenos produtores;
+- Educação tecnológica.
+
+
+## Plataforma
+
+Microcontrolador:
+
+ESP32
+
+
+---
+
+# 2. DESCRIÇÃO DO PROJETO
+
+
+A Horta do Futuro consiste no desenvolvimento de um sistema inteligente de monitoramento agrícola aplicado ao cultivo hidropônico em ambientes controlados.
+
+O projeto propõe a criação de um "computador de plantas", capaz de coletar informações do ambiente e da solução nutritiva, interpretar esses dados e auxiliar o usuário na tomada de decisões relacionadas ao cultivo.
+
+
+O sistema integra sensores, processamento embarcado, interface de usuário e automação, formando uma plataforma tecnológica capaz de acompanhar o desenvolvimento das plantas e fornecer informações sobre a saúde do cultivo.
+
+
+A proposta busca aproximar tecnologias utilizadas na agricultura inteligente de pequenos produtores e ambientes urbanos, permitindo que pessoas com espaço reduzido possam produzir alimentos de forma mais controlada, sustentável e acessível.
+
+
+---
+
+# 3. PROBLEMA
+
+
+A produção de alimentos em ambientes urbanos enfrenta limitações como:
+
+- falta de espaço;
+- dificuldade de controle das condições de cultivo;
+- ausência de conhecimento técnico;
+- desperdício de água e nutrientes.
+
+
+Sistemas agrícolas inteligentes normalmente possuem custo elevado e são direcionados para grandes produtores.
+
+
+A Horta do Futuro busca explorar uma alternativa de menor escala, utilizando tecnologia embarcada acessível para auxiliar pequenos cultivos.
+
+
+---
+
+# 4. OBJETIVO GERAL
+
+
+Desenvolver um sistema embarcado inteligente capaz de monitorar e auxiliar o cultivo hidropônico em ambientes controlados, funcionando como um computador de plantas.
+
+
+---
+
+# 5. OBJETIVOS ESPECÍFICOS
+
+
+O sistema deverá:
+
+
+- Monitorar temperatura e umidade do ambiente;
+
+- Monitorar temperatura da solução nutritiva;
+
+- Monitorar nível do reservatório;
+
+- Monitorar parâmetros químicos da solução;
+
+- Apresentar informações ao usuário;
+
+- Calcular um índice de saúde do cultivo;
+
+- Gerar diagnósticos básicos;
+
+- Automatizar equipamentos auxiliares;
+
+- Registrar informações do cultivo.
+
+
+---
+
+# 6. CONCEITO DO COMPUTADOR DE PLANTAS
+
+
+A Horta do Futuro não tem como objetivo apenas ligar e desligar equipamentos.
+
+O sistema busca transformar dados em informação.
+
+
+Fluxo:
+
+
+Sensores
+
+↓
+
+Aquisição de dados
+
+↓
+
+Processamento
+
+↓
+
+Interpretação
+
+↓
+
+Índice de saúde
+
+↓
+
+Diagnóstico
+
+↓
+
+Ação
+
+
+Dessa forma, o sistema atua como um supervisor do ambiente de cultivo.
+
+
+---
+
+# 7. ARQUITETURA DO SISTEMA
+
+
+## Entrada
+
+
+Sensores:
+
+
+### Ambiente
+
+- DHT22
+  - Temperatura do ar;
+  - Umidade relativa.
+
+
+### Água
+
+- DS18B20 impermeável
+  - Temperatura da solução nutritiva.
+
+
+### Reservatório
+
+- Sensor de nível sem contato XKC-Y25
+
+
+### Solução nutritiva
+
+- Sensor de pH;
+- Sensor EC/TDS.
+
+
+---
+
+
+## Processamento
+
+
+Microcontrolador:
+
+
+ESP32 DevKit V1
+
+
+Responsável por:
+
+- leitura dos sensores;
+- processamento dos dados;
+- gerenciamento dos modos de cultivo;
+- comunicação com periféricos.
+
+
+---
+
+
+## Saídas
+
+
+Atuadores:
+
+
+- Iluminação;
+- Ventilação;
+- Bombas;
+- Alarmes futuros.
+
+
+---
+
+
+## Interface
+
+
+Display:
+
+OLED SSD1306 128x64 I2C
+
+
+Informações exibidas:
+
+- temperatura;
+- umidade;
+- pH;
+- EC;
+- nível;
+- saúde do cultivo;
+- mensagens de diagnóstico.
+
+
+---
+
+# 8. PERFIS DE CULTIVO
+
+
+O sistema será desenvolvido considerando perfis configuráveis.
+
+
+Perfis iniciais:
+
+
+## Alface
+
+Parâmetros:
+
+Temperatura:
+18°C - 26°C
+
+pH:
+5,5 - 6,5
+
+Fotoperíodo:
+aproximadamente 16 horas
+
+
+---
+
+## Manjericão
+
+Parâmetros:
+
+Temperatura:
+20°C - 30°C
+
+pH:
+5,5 - 6,8
+
+Fotoperíodo:
+aproximadamente 14 horas
+
+
+---
+
+# 9. ÍNDICE DE SAÚDE DO CULTIVO
+
+
+O sistema possuirá um índice numérico para representar a condição geral da planta.
+
+
+Exemplo:
+
+
+Saúde:
+
+90%
+
+
+Baseado em:
+
+- temperatura;
+- umidade;
+- pH;
+- EC;
+- nível de água.
+
+
+O objetivo é transformar informações técnicas em uma resposta simples para o usuário.
+
+
+---
+
+# 10. AUTOMAÇÃO
+
+
+A primeira versão permitirá controle de:
+
+
+- iluminação;
+- ventilação;
+- bombeamento.
+
+
+A automação será baseada nos dados coletados.
+
+
+Exemplo:
+
+
+Temperatura elevada:
+
+↓
+
+acionamento da ventilação.
+
+
+Nível baixo:
+
+↓
+
+alerta ao usuário.
+
+
+---
+
+# 11. ARMAZENAMENTO DE DADOS
+
+
+Expansão prevista:
+
+
+RTC DS3231:
+
+Controle de horário.
+
+
+Cartão SD:
+
+Registro histórico do cultivo.
+
+
+Possíveis dados:
+
+
+- temperatura;
+- pH;
+- EC;
+- eventos;
+- histórico de saúde.
+
+
+---
+
+# 12. LIMITAÇÕES DA VERSÃO INICIAL
+
+
+A primeira versão não possuirá:
+
+
+- inteligência artificial avançada;
+- aplicativo móvel;
+- visão computacional;
+- múltiplas estufas;
+- integração em nuvem.
+
+
+Essas funcionalidades serão consideradas expansões futuras.
+
+
+---
+
+# 13. EXPANSÕES FUTURAS
+
+
+Possíveis evoluções:
+
+
+## Aplicativo móvel
+
+Interface para acompanhamento remoto.
+
+
+## Inteligência Artificial
+
+Assistente especializado em cultivo hidropônico.
+
+
+## Visão computacional
+
+Análise visual das plantas.
+
+
+## Escala agrícola
+
+Possibilidade de aplicação em:
+
+- pequenas propriedades;
+- estufas comerciais;
+- múltiplos módulos de cultivo.
+
+
+---
+
+# 14. JUSTIFICATIVA SOCIAL
+
+
+A Horta do Futuro parte da ideia de democratizar o acesso à tecnologia agrícola.
+
+A proposta é aproximar pessoas do processo de produção de alimentos, permitindo que ambientes urbanos também possam participar de modelos sustentáveis de cultivo.
+
+
+Mesmo sendo um protótipo de pequena escala, o projeto representa uma visão futura de produção descentralizada, onde tecnologia e natureza trabalham juntas.
+
+
+---
+
+# 15. RESULTADO ESPERADO
+
+
+Ao final do projeto espera-se obter um protótipo funcional de uma estufa hidropônica inteligente, capaz de monitorar condições ambientais, interpretar dados e auxiliar o usuário no desenvolvimento das plantas.
+
+
+A Horta do Futuro representa a união entre eletrônica, programação, agricultura e sustentabilidade, utilizando tecnologia acessível para criar uma nova forma de interação entre pessoas e produção de alimentos.
+
+
+---
+
+# FIM DA ESPECIFICAÇÃO TÉCNICA V1.0

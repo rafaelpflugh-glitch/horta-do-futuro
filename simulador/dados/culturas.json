@@ -1,0 +1,20 @@
+{
+    "TOMATE": {
+        "nome": "TOMATE",
+        "nome_cultivo": "Tomate da Feira #01",
+        "fase": "VEGETATIVO",
+        "ph_min": 5.5,
+        "ph_max": 6.5,
+        "ec_min": 1.0,
+        "ec_max": 1.8,
+        "temperatura_ar_min": 18.0,
+        "temperatura_ar_max": 26.0,
+        "temperatura_agua_min": 18.0,
+        "temperatura_agua_max": 26.0,
+        "umidade_ar_min": 50.0,
+        "umidade_ar_max": 80.0,
+        "fotoperiodo_horas": 18.0,
+        "inicio_luz_hora": 6,
+        "inicio_luz_minuto": 0
+    }
+}

@@ -1,0 +1,629 @@
+# HORTA DO FUTURO
+
+# Lista de Materiais (BOM)
+
+## Bill of Materials
+
+Versão:
+V1.0
+
+---
+
+# 1. UNIDADE DE PROCESSAMENTO
+
+## 1.1 ESP32 DevKit V1
+
+
+Quantidade:
+
+1 unidade
+
+
+Função:
+
+Cérebro eletrônico do sistema.
+
+
+Responsável por:
+
+- leitura dos sensores;
+- processamento;
+- comunicação;
+- controle dos atuadores.
+
+
+Especificação:
+
+ESP32-WROOM-32
+
+Placa:
+
+ESP32 DevKit V1
+
+
+Interface:
+
+- WiFi;
+- Bluetooth;
+- GPIO;
+- ADC;
+- I2C;
+- SPI.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+---
+
+# 2. INTERFACE DO USUÁRIO
+
+
+## 2.1 Display OLED
+
+
+Modelo recomendado:
+
+OLED SSD1306
+
+
+Tamanho:
+
+0.96 polegadas
+
+
+Resolução:
+
+128x64 pixels
+
+
+Comunicação:
+
+I2C
+
+
+Endereço:
+
+0x3C
+
+
+Função:
+
+Exibir:
+
+- temperatura;
+- umidade;
+- pH;
+- EC;
+- nível;
+- saúde;
+- diagnóstico.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+---
+
+## 2.2 Display TFT (futuro)
+
+
+Modelo:
+
+TFT LCD SPI
+
+
+Tamanhos possíveis:
+
+2.4"
+2.8"
+3.5"
+
+
+Aplicação:
+
+Versão avançada.
+
+
+Prioridade:
+
+V2
+
+
+---
+
+# 3. SENSORES AMBIENTAIS
+
+
+## 3.1 Sensor DHT22
+
+
+Nome completo:
+
+Sensor Digital de Temperatura e Umidade DHT22 / AM2302
+
+
+Medições:
+
+- temperatura;
+- umidade relativa.
+
+
+Uso:
+
+Ambiente interno do grow.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+---
+
+## 3.2 Sensor DS18B20
+
+
+Nome completo:
+
+Sensor Digital de Temperatura à Prova d'Água DS18B20
+
+
+Medição:
+
+Temperatura da solução nutritiva.
+
+
+Características:
+
+- encapsulamento inox;
+- comunicação OneWire.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+---
+
+# 4. SENSORES DA SOLUÇÃO NUTRITIVA
+
+
+## 4.1 Sensor de pH
+
+
+Nome:
+
+Módulo Sensor de pH para Arduino/ESP32
+
+
+Função:
+
+Medição da acidez da solução.
+
+
+Faixa:
+
+0-14 pH
+
+
+Uso:
+
+Controle da solução nutritiva.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+Observação:
+
+Necessita calibração.
+
+
+---
+
+## 4.2 Sensor EC/TDS
+
+
+Nome:
+
+Sensor de Condutividade Elétrica EC/TDS
+
+
+Função:
+
+Estimar concentração de nutrientes.
+
+
+Medição:
+
+- EC;
+- TDS;
+- ppm.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+Observação:
+
+Necessita calibração.
+
+
+---
+
+# 5. SENSOR DE RESERVATÓRIO
+
+
+## 5.1 Sensor de nível sem contato
+
+
+Modelo:
+
+XKC-Y25-NPN
+
+
+Função:
+
+Detectar presença de líquido.
+
+
+Vantagens:
+
+- não entra em contato com água;
+- maior segurança;
+- evita corrosão.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+---
+
+# 6. AUTOMAÇÃO
+
+
+## 6.1 Módulo relé
+
+
+Modelo recomendado:
+
+Módulo Relé 4 canais 5V
+
+
+Função:
+
+Acionar:
+
+- iluminação;
+- bomba;
+- ventilação.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+---
+
+## 6.2 MOSFET de potência
+
+
+Aplicação futura:
+
+Controle PWM.
+
+
+Uso:
+
+- LEDs;
+- bombas DC;
+- ventiladores.
+
+
+Prioridade:
+
+V2
+
+
+---
+
+# 7. SISTEMA HIDROPÔNICO
+
+
+## 7.1 Reservatório
+
+
+Material:
+
+Plástico opaco.
+
+
+Função:
+
+Armazenar solução nutritiva.
+
+
+Requisitos:
+
+- impedir entrada de luz;
+- evitar algas;
+- permitir tampa.
+
+
+---
+
+## 7.2 Net Pots
+
+
+Modelo:
+
+Cesta hidropônica.
+
+
+Tamanho sugerido:
+
+75 mm
+
+
+Função:
+
+Suporte das plantas.
+
+
+Quantidade:
+
+2 unidades
+
+
+Cultivos:
+
+- alface;
+- manjericão.
+
+
+---
+
+## 7.3 Argila expandida
+
+
+Função:
+
+Sustentação das raízes.
+
+
+---
+
+## 7.4 Bomba de ar
+
+
+Modelo:
+
+Aerador para aquário.
+
+
+Função:
+
+Oxigenação da solução.
+
+
+---
+
+## 7.5 Pedra porosa
+
+
+Função:
+
+Distribuir oxigênio.
+
+
+---
+
+# 8. ILUMINAÇÃO
+
+
+## LED Grow
+
+
+Opção inicial:
+
+Painel LED Full Spectrum
+
+
+Potência:
+
+30W a 60W
+
+
+Características:
+
+- luz branca;
+- vermelho 660nm;
+- azul.
+
+
+Função:
+
+Fotossíntese.
+
+
+Prioridade:
+
+OBRIGATÓRIO
+
+
+---
+
+# 9. SEGURANÇA ELÉTRICA
+
+
+## Entrada de energia
+
+
+Adicionar:
+
+- fusível;
+- chave geral;
+- bornes;
+- disjuntor pequeno.
+
+
+Objetivo:
+
+Separar totalmente:
+
+Área molhada
+
+×
+
+Área elétrica.
+
+
+---
+
+# 10. ARMAZENAMENTO
+
+
+## RTC DS3231
+
+
+Função:
+
+Controle de horário.
+
+
+Aplicação:
+
+- fotoperíodo;
+- diário.
+
+
+Prioridade:
+
+V1.2
+
+
+---
+
+## Módulo Micro SD
+
+
+Função:
+
+Registrar histórico.
+
+
+Prioridade:
+
+V1.2
+
+
+---
+
+# 11. CÂMERA
+
+
+Modelo disponível:
+
+Câmera PS3 USB
+
+
+Aplicação:
+
+Timelapse.
+
+
+Prioridade:
+
+V2
+
+
+---
+
+# 12. ESTRUTURA
+
+
+Utilizar:
+
+Grow metálico existente.
+
+
+Adicionar:
+
+- isolamento elétrico;
+- organização de cabos;
+- suporte sensores;
+- suporte iluminação.
+
+
+---
+
+# RESUMO
+
+
+## Compra inicial obrigatória:
+
+
+ESP32
+
+OLED
+
+DHT22
+
+DS18B20
+
+pH
+
+EC/TDS
+
+XKC-Y25
+
+Relé
+
+RTC
+
+SD
+
+Bomba de ar
+
+Net pots
+
+Argila expandida
+
+LED grow
+
+Materiais elétricos
+
+
+---
+
+# OBJETIVO DA V1
+
+
+Construir um computador de plantas funcional.
+
+
+Não apenas uma automação.
+
+
+O sistema deve:
+
+medir;
+
+interpretar;
+
+mostrar;
+
+agir.

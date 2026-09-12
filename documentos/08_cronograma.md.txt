@@ -1,0 +1,551 @@
+# HORTA DO FUTURO
+
+# Cronograma de Desenvolvimento
+
+## Planejamento para conclusão em 4 meses
+
+
+Versão:
+
+V1.0
+
+
+---
+
+# 1. OBJETIVO DO CRONOGRAMA
+
+
+O cronograma foi elaborado considerando o desenvolvimento completo de um protótipo funcional da Horta do Futuro em quatro meses.
+
+
+O planejamento prioriza:
+
+
+- funcionamento eletrônico;
+- integração dos sensores;
+- desenvolvimento do firmware;
+- cultivo real;
+- documentação;
+- preparação da apresentação.
+
+
+A estratégia adotada é desenvolver primeiro o núcleo funcional e posteriormente adicionar recursos de expansão.
+
+
+---
+
+# 2. DIVISÃO DAS ETAPAS
+
+MÊS 1
+
+Fundação do sistema
+
+↓
+
+MÊS 2
+
+Integração eletrônica e software
+
+↓
+
+MÊS 3
+
+Cultivo experimental e melhorias
+
+↓
+
+MÊS 4
+
+Finalização e apresentação
+
+
+
+---
+
+# MÊS 1 — CONSTRUÇÃO DA BASE
+
+
+## Objetivo:
+
+Criar o cérebro da Horta do Futuro.
+
+
+Atividades:
+
+
+## Documentação
+
+Finalizar:
+
+
+- especificação técnica;
+- arquitetura;
+- materiais;
+- mapa de pinos;
+- lógica de funcionamento.
+
+
+---
+
+## Desenvolvimento eletrônico
+
+
+Montagem inicial:
+
+
+- ESP32;
+- alimentação;
+- OLED;
+- botões;
+- comunicação I2C.
+
+
+---
+
+## Desenvolvimento do firmware base
+
+
+Implementar:
+
+
+- estrutura do programa;
+- leitura serial;
+- menus;
+- interface inicial;
+- organização dos arquivos.
+
+
+---
+
+## Testes
+
+
+Validar:
+
+
+- ESP32 funcionando;
+- display funcionando;
+- comunicação dos módulos.
+
+
+---
+
+# Entrega do mês 1:
+
+
+Sistema eletrônico básico funcionando.
+
+
+Resultado esperado:
+
+
+
+ESP32
+
+OLED
+
+Menu
+
+Estrutura do firmware
+
+
+
+---
+
+# MÊS 2 — INTEGRAÇÃO DOS SENSORES E AUTOMAÇÃO
+
+
+## Objetivo:
+
+Transformar o ESP32 em um computador de plantas.
+
+
+Atividades:
+
+
+## Instalação dos sensores
+
+
+Adicionar:
+
+
+- DHT22;
+- DS18B20;
+- sensor de nível;
+- pH;
+- EC/TDS.
+
+
+---
+
+## Desenvolvimento do sistema inteligente
+
+
+Implementar:
+
+
+- leitura dos sensores;
+- tratamento dos dados;
+- cálculo do índice de saúde;
+- diagnóstico.
+
+
+---
+
+## Automação
+
+
+Adicionar:
+
+
+- módulo relé;
+- iluminação;
+- bomba;
+- ventilação.
+
+
+---
+
+## Interface
+
+
+Criar:
+
+
+- tela principal;
+- tela de sensores;
+- tela de saúde;
+- tela de diagnóstico.
+
+
+---
+
+# Entrega do mês 2:
+
+
+Primeira versão funcional do computador de plantas.
+
+
+Resultado:
+
+
+
+Sensores
+
+↓
+
+ESP32
+
+↓
+
+Diagnóstico
+
+↓
+
+Display
+
+↓
+
+Controle
+
+
+
+---
+
+# MÊS 3 — CULTIVO REAL E VALIDAÇÃO
+
+
+## Objetivo:
+
+Colocar a Horta do Futuro para trabalhar.
+
+
+Atividades:
+
+
+## Montagem física da estufa
+
+
+Instalação:
+
+
+- reservatório;
+- net pots;
+- argila expandida;
+- iluminação;
+- eletrônica;
+- organização dos cabos.
+
+
+---
+
+## Início do cultivo
+
+
+Plantas:
+
+
+- alface;
+- manjericão.
+
+
+---
+
+## Monitoramento
+
+
+Registrar:
+
+
+- crescimento;
+- condições ambientais;
+- histórico dos sensores.
+
+
+---
+
+## Melhorias
+
+
+Ajustar:
+
+
+- calibração;
+- interface;
+- estabilidade;
+- organização física.
+
+
+---
+
+## Registro visual
+
+
+Produzir:
+
+
+- fotografias;
+- timelapse;
+- documentação do desenvolvimento.
+
+
+---
+
+# Entrega do mês 3:
+
+
+Protótipo cultivando plantas reais.
+
+
+---
+
+# MÊS 4 — FINALIZAÇÃO E APRESENTAÇÃO
+
+
+## Objetivo:
+
+Transformar o protótipo em projeto final.
+
+
+Atividades:
+
+
+## Refinamento
+
+
+Melhorar:
+
+
+- acabamento;
+- organização;
+- segurança elétrica;
+- apresentação visual.
+
+
+---
+
+## Documentação final
+
+
+Finalizar:
+
+
+- metodologia;
+- resultados;
+- conclusões;
+- manual de funcionamento.
+
+
+---
+
+## Recursos demonstrativos
+
+
+Preparar:
+
+
+- vídeo do cultivo;
+- gráficos;
+- imagens;
+- demonstração ao vivo.
+
+
+---
+
+## Preparação da apresentação
+
+
+Demonstrar:
+
+
+1.
+
+O problema:
+
+
+Produção de alimentos em ambientes urbanos.
+
+
+2.
+
+A solução:
+
+
+Computador de plantas inteligente.
+
+
+3.
+
+A tecnologia:
+
+
+ESP32 + sensores + automação.
+
+
+4.
+
+O futuro:
+
+
+IA, aplicativo e expansão agrícola.
+
+
+---
+
+# Entrega final:
+
+
+Horta do Futuro funcionando como protótipo tecnológico.
+
+
+---
+
+# 3. RECURSOS DE EXPANSÃO
+
+
+Caso exista tempo adicional:
+
+
+## Aplicativo móvel
+
+Prioridade:
+
+média
+
+
+---
+
+## Câmera PS3
+
+Prioridade:
+
+média
+
+
+Aplicação:
+
+timelapse e acompanhamento visual.
+
+
+---
+
+## Inteligência Artificial
+
+
+Prioridade:
+
+baixa na primeira apresentação.
+
+
+Aplicação futura:
+
+assistente especialista em cultivo.
+
+
+---
+
+## TFT
+
+
+Prioridade:
+
+baixa.
+
+
+Aplicação:
+
+interface avançada.
+
+
+---
+
+# 4. MARCOS PRINCIPAIS
+
+
+## Marco 1
+
+Primeiro mês:
+
+ESP32 + interface funcionando.
+
+
+---
+
+## Marco 2
+
+Segundo mês:
+
+Sistema monitorando sensores.
+
+
+---
+
+## Marco 3
+
+Terceiro mês:
+
+Plantas crescendo no sistema.
+
+
+---
+
+## Marco 4
+
+Quarto mês:
+
+Protótipo final apresentado.
+
+
+---
+
+# CONCLUSÃO
+
+
+O cronograma de quatro meses prioriza a entrega de um sistema funcional, documentado e visualmente demonstrável.
+
+
+A estratégia garante que a Horta do Futuro seja apresentada não apenas como uma automação eletrônica, mas como uma solução tecnológica aplicada à agricultura urbana inteligente.
+
+---
+
+# FIM DO DOCUMENTO

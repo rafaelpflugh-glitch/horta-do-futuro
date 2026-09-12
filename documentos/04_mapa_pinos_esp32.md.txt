@@ -1,0 +1,434 @@
+# HORTA DO FUTURO
+
+# Mapa de Pinos ESP32
+
+## Documento de Configuração de Hardware
+
+Versão:
+V1.0
+
+
+---
+
+# 1. MICROCONTROLADOR
+
+
+## ESP32 DevKit V1
+
+
+Modelo:
+
+ESP32-WROOM-32
+
+
+Tensão lógica:
+
+3.3V
+
+
+Alimentação:
+
+5V via USB
+ou
+5V/VIN
+
+
+Características utilizadas:
+
+- GPIO digital;
+- ADC;
+- I2C;
+- OneWire;
+- SPI.
+
+
+---
+
+# 2. ORGANIZAÇÃO DOS PINOS
+
+
+## Comunicação I2C
+
+
+Utilizada por:
+
+- OLED;
+- RTC DS3231.
+
+
+| Função | GPIO |
+|---|---|
+| SDA | 21 |
+| SCL | 22 |
+
+
+Observação:
+
+Todos os dispositivos I2C compartilham o mesmo barramento.
+
+
+Exemplo:
+
+
+ESP32
+
+GPIO21 -------- SDA OLED
+              |
+              SDA RTC
+
+
+GPIO22 -------- SCL OLED
+              |
+              SCL RTC
+
+
+
+---
+
+# 3. SENSOR DE TEMPERATURA E UMIDADE
+
+
+## DHT22
+
+
+Função:
+
+Temperatura do ambiente.
+
+Umidade relativa.
+
+
+Comunicação:
+
+Digital.
+
+
+Ligação:
+
+
+| Função | ESP32 |
+|-|-|
+| DATA | GPIO 4 |
+| VCC | 3.3V |
+| GND | GND |
+
+
+
+---
+
+# 4. SENSOR DE TEMPERATURA DA ÁGUA
+
+
+## DS18B20 Impermeável
+
+
+Função:
+
+Temperatura da solução nutritiva.
+
+
+Comunicação:
+
+OneWire.
+
+
+Ligação:
+
+
+| Função | ESP32 |
+|-|-|
+| DATA | GPIO 5 |
+| VCC | 3.3V |
+| GND | GND |
+
+
+
+Observação:
+
+Necessita resistor pull-up de 4.7kΩ entre DATA e VCC.
+
+
+
+---
+
+# 5. SENSOR DE pH
+
+
+## Módulo Sensor de pH
+
+
+Função:
+
+Medição da acidez da solução nutritiva.
+
+
+Tipo:
+
+Analógico.
+
+
+Ligação:
+
+
+| Função | ESP32 |
+|-|-|
+| Saída analógica | GPIO 34 |
+| VCC | 5V |
+| GND | GND |
+
+
+
+Observação:
+
+
+GPIO34 é entrada analógica somente.
+
+
+Ideal para leitura de sensores.
+
+
+---
+
+# 6. SENSOR EC/TDS
+
+
+## Sensor de Condutividade Elétrica
+
+
+Função:
+
+Medição da concentração de nutrientes.
+
+
+Tipo:
+
+Analógico.
+
+
+Ligação:
+
+
+| Função | ESP32 |
+|-|-|
+| Saída analógica | GPIO 35 |
+| VCC | 3.3V/5V |
+| GND | GND |
+
+
+
+Observação:
+
+
+GPIO35 é entrada analógica somente.
+
+
+---
+
+# 7. SENSOR DE NÍVEL
+
+
+## XKC-Y25-NPN
+
+
+Função:
+
+Detectar nível do reservatório.
+
+
+Tipo:
+
+Saída digital.
+
+
+Ligação:
+
+
+| Função | ESP32 |
+|-|-|
+| Sinal | GPIO 27 |
+| VCC | 5V |
+| GND | GND |
+
+
+
+Observação:
+
+
+Como o sensor trabalha em 5V, deve ser verificada a saída NPN para não aplicar tensão superior a 3.3V no ESP32.
+
+
+Pode ser necessário:
+
+- divisor resistivo;
+- transistor;
+- módulo adaptador.
+
+
+---
+
+# 8. MÓDULO RELÉS
+
+
+## Relé 4 canais
+
+
+Função:
+
+Controle dos equipamentos.
+
+
+Canais:
+
+
+| Equipamento | GPIO |
+|-|-|
+| Luz | GPIO16 |
+| Ventilação | GPIO17 |
+| Bomba | GPIO26 |
+| Reserva | GPIO25 |
+
+
+
+Observação:
+
+
+Relés devem possuir alimentação separada quando necessário.
+
+
+---
+
+# 9. RTC
+
+
+## DS3231
+
+
+Função:
+
+Relógio de tempo real.
+
+
+Comunicação:
+
+I2C.
+
+
+Ligação:
+
+
+| Função | ESP32 |
+|-|-|
+| SDA | GPIO21 |
+| SCL | GPIO22 |
+
+
+
+---
+
+# 10. CARTÃO SD
+
+
+## Módulo Micro SD
+
+
+Comunicação:
+
+SPI.
+
+
+Pinos:
+
+
+| Função | GPIO |
+|-|-|
+| CS | GPIO13 |
+| MOSI | GPIO23 |
+| MISO | GPIO19 |
+| SCK | GPIO18 |
+
+
+
+---
+
+# 11. BOTÕES DE INTERFACE
+
+
+Controle do menu.
+
+
+Sugestão:
+
+
+| Botão | GPIO |
+|-|-|
+| Cima | GPIO32 |
+| Baixo | GPIO33 |
+| OK | GPIO14 |
+| Voltar | GPIO12 |
+
+
+
+---
+
+# 12. RESUMO GERAL
+
+
+| Dispositivo | GPIO |
+|-|-|
+| DHT22 | 4 |
+| DS18B20 | 5 |
+| pH | 34 |
+| EC/TDS | 35 |
+| Nível | 27 |
+| Relé Luz | 16 |
+| Relé Ventilador | 17 |
+| Relé Bomba | 26 |
+| OLED SDA | 21 |
+| OLED SCL | 22 |
+| SD CS | 13 |
+| SD MOSI | 23 |
+| SD MISO | 19 |
+| SD CLK | 18 |
+
+
+
+---
+
+# 13. REGRAS DE HARDWARE
+
+
+## Segurança
+
+
+A parte elétrica deve ser fisicamente separada da parte hidráulica.
+
+
+A caixa deve possuir:
+
+
+- fusível de entrada;
+- chave geral;
+- bornes;
+- organização dos cabos;
+- proteção contra umidade.
+
+
+---
+
+# 14. EXPANSÃO FUTURA
+
+
+Possíveis recursos:
+
+
+- câmera;
+- TFT;
+- ESP32 adicional;
+- sensores extras;
+- comunicação WiFi;
+- aplicativo.
+
+
+---
+
+# FIM DO DOCUMENTO

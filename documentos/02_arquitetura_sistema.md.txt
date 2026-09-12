@@ -1,0 +1,616 @@
+# HORTA DO FUTURO
+
+## Arquitetura do Sistema
+
+### Um Computador de Plantas para Cultivo Hidropônico Inteligente
+
+
+---
+
+# 1. INTRODUÇÃO
+
+
+A arquitetura da Horta do Futuro foi desenvolvida com o objetivo de criar um sistema embarcado modular, capaz de monitorar, interpretar e auxiliar o controle de um ambiente de cultivo hidropônico.
+
+
+O sistema foi organizado em camadas, permitindo evolução futura sem necessidade de reconstrução completa do projeto.
+
+
+A arquitetura considera:
+
+- aquisição de dados;
+- processamento embarcado;
+- análise das condições do cultivo;
+- automação;
+- interação com usuário.
+
+
+---
+
+# 2. VISÃO GERAL DO SISTEMA
+
+
+O funcionamento geral segue o fluxo:
+
+                AMBIENTE DE CULTIVO
+
+
+                      |
+                      |
+                      v
+
+
+                SENSORES
+
+
+                      |
+                      |
+                      v
+
+
+             AQUISIÇÃO DE DADOS
+
+
+                      |
+                      |
+                      v
+
+
+                  ESP32
+
+
+                      |
+      --------------------------------
+
+      |              |              |
+
+ PROCESSAMENTO   INTERFACE    ARMAZENAMENTO
+
+
+      |
+      |
+      v
+
+
+ DIAGNÓSTICO
+
+
+      |
+      |
+      v
+
+
+ AUTOMAÇÃO
+
+
+      |
+      |
+      v
+
+
+EQUIPAMENTOS DO CULTIVO
+
+
+
+---
+
+# 3. CAMADAS DO SISTEMA
+
+
+A Horta do Futuro é dividida em seis camadas principais.
+
+
+---
+
+# CAMADA 1
+
+# Sensoriamento
+
+
+Responsável pela coleta das informações do ambiente.
+
+
+Sensores utilizados:
+
+
+## Ambiente
+
+
+### DHT22
+
+Mede:
+
+- temperatura do ar;
+- umidade relativa.
+
+
+---
+
+## Solução nutritiva
+
+
+### DS18B20 impermeável
+
+Mede:
+
+- temperatura da água.
+
+
+---
+
+## Parâmetros químicos
+
+
+### Sensor de pH
+
+Mede:
+
+- acidez ou alcalinidade da solução nutritiva.
+
+
+### Sensor EC/TDS
+
+Mede:
+
+- condutividade elétrica;
+- concentração aproximada de sais dissolvidos.
+
+
+---
+
+## Reservatório
+
+
+### XKC-Y25
+
+Sensor de nível sem contato.
+
+
+Responsável por identificar:
+
+- nível adequado;
+- falta de água.
+
+
+---
+
+# CAMADA 2
+
+# Processamento Embarcado
+
+
+O núcleo do sistema utiliza:
+
+
+## ESP32 DevKit V1
+
+
+Responsabilidades:
+
+
+- comunicação com sensores;
+- processamento matemático;
+- execução das regras de cultivo;
+- controle dos atuadores;
+- gerenciamento da interface.
+
+
+O ESP32 funciona como o cérebro eletrônico da Horta do Futuro.
+
+
+---
+
+# CAMADA 3
+
+# Inteligência de Cultivo
+
+
+Esta camada transforma medições em informações úteis.
+
+
+Funções:
+
+
+## Perfil de cultivo
+
+
+Armazena parâmetros específicos:
+
+
+Exemplo:
+
+
+Alface:
+pH ideal:
+5.5 - 6.5
+
+Temperatura:
+18 - 26°C
+
+EC:
+1.0 - 1.8
+
+
+
+---
+
+## Índice de Saúde
+
+
+O sistema calcula uma estimativa da condição geral do cultivo.
+
+
+Exemplo:
+
+
+
+Temperatura:
+25°C
++
+pH:
+6.1
++
+EC:
+1.4
++
+Nível:
+OK
+
+Resultado:
+
+Saúde do cultivo:
+94%
+
+
+
+---
+
+## Diagnóstico
+
+
+Transforma dados em mensagens.
+
+
+Exemplos:
+
+
+
+STATUS:
+
+Cultivo saudável.
+
+
+
+ou:
+
+
+
+ATENÇÃO:
+
+pH acima do recomendado.
+Verificar solução nutritiva.
+
+
+
+---
+
+# CAMADA 4
+
+# Automação
+
+
+Responsável pelas ações físicas.
+
+
+Saídas:
+
+
+## Iluminação
+
+
+Controle:
+
+- fotoperíodo;
+- horários.
+
+
+---
+
+## Ventilação
+
+
+Controle:
+
+- temperatura;
+- circulação de ar.
+
+
+---
+
+## Bombas
+
+
+Controle:
+
+- oxigenação;
+- circulação.
+
+
+---
+
+# CAMADA 5
+
+# Interface do Usuário
+
+
+A comunicação inicial será realizada através de:
+
+
+## Display OLED SSD1306
+
+
+Informações:
+
+
+Tela principal:
+
+
+
+HORTA DO FUTURO
+
+ALFACE
+
+Saúde:
+94%
+
+Temp:
+24°C
+
+pH:
+6.1
+
+Água:
+OK
+
+
+
+---
+
+Menus previstos:
+
+
+
+MENU
+
+Cultivo
+
+Sensores
+
+Saúde
+
+Diagnóstico
+
+Configuração
+
+
+
+---
+
+# CAMADA 6
+
+# Armazenamento
+
+
+Responsável pelo histórico.
+
+
+Componentes:
+
+
+## RTC DS3231
+
+
+Permite:
+
+- controle de horário;
+- registro temporal.
+
+
+---
+
+## Cartão Micro SD
+
+
+Armazena:
+
+
+- medições;
+- eventos;
+- histórico.
+
+
+Exemplo:
+
+
+
+11/07/2026
+
+10:30
+
+Temperatura:
+24.5°C
+
+pH:
+6.2
+
+EC:
+1.5
+
+Saúde:
+93%
+
+
+
+---
+
+# 4. ARQUITETURA DO SOFTWARE
+
+
+O firmware será organizado em módulos.
+
+
+
+HORTA_DO_FUTURO_V1
+
+|
+|
++-- Núcleo
+
+main
+
+|
+|
++-- Configuração
+
+config
+
+|
+|
++-- Sensores
+
+temperatura
+
+pH
+
+EC
+
+nível
+
+|
+|
++-- Inteligência
+
+cultivo
+
+saúde
+
+diagnóstico
+
+|
+|
++-- Controle
+
+automação
+
+|
+|
++-- Interface
+
+display
+
+menu
+
+|
+|
++-- Memória
+
+RTC
+
+SD
+
+
+---
+
+# 5. PRINCÍPIOS DE DESENVOLVIMENTO
+
+
+A arquitetura seguirá:
+
+
+## Modularidade
+
+Cada função possui seu próprio módulo.
+
+
+## Expansibilidade
+
+Novos sensores podem ser adicionados.
+
+
+## Manutenção
+
+Alterações não devem comprometer o sistema completo.
+
+
+## Baixo custo
+
+Utilização de componentes acessíveis.
+
+
+---
+
+# 6. EXPANSÕES FUTURAS
+
+
+A arquitetura permite:
+
+
+## Aplicativo móvel
+
+
+Comunicação:
+
+ESP32 WiFi/Bluetooth.
+
+
+---
+
+## Inteligência Artificial
+
+
+Possível integração com:
+
+
+- modelos locais;
+- assistente especialista em cultivo.
+
+
+A IA poderá atuar como supervisor do ambiente.
+
+
+---
+
+## Escala agrícola
+
+
+A arquitetura pode evoluir para:
+
+
+      CENTRAL
+
+
+         |
+
+| | |
+
+HORTA 1 HORTA 2 HORTA 3
+
+
+
+Permitindo múltiplos módulos de cultivo.
+
+
+---
+
+# 7. CONCLUSÃO
+
+
+A arquitetura da Horta do Futuro foi planejada para transformar um sistema simples de automação em uma plataforma inteligente de monitoramento agrícola.
+
+
+O projeto une eletrônica embarcada, programação, agricultura e sustentabilidade, criando uma base tecnológica capaz de evoluir desde uma pequena horta doméstica até aplicações agrícolas maiores.
+
+
+---
+
+# FIM DO DOCUMENTO
