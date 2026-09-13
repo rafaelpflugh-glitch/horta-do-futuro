@@ -21,7 +21,7 @@ void limparAlertas() {
 }
 
 //=================================================
-// DIAGNÓSTICO INDIVIDUAL DE PARÂMETROS
+// AVALIAÇÃO DE PARÂMETROS
 //=================================================
 void diagnosticarPH() {
     if (solucao.ph < cultivoAtual.phMin) alertas.phBaixo = true;
@@ -48,33 +48,73 @@ void diagnosticarNivel() {
 }
 
 //=================================================
-// CÁLCULO DE SAÚDE (Embrionário do Gêmeo Digital)
+// CÁLCULO DE SAÚDE BIOLÓGICA (Idêntico ao Gêmeo Digital)
 //=================================================
 void calcularSaude() {
-    int pontos = 100;
+    float pontos = 100.0;
 
-    if (alertas.phBaixo || alertas.phAlto) pontos -= 20;
-    if (alertas.ecBaixo || alertas.ecAlto) pontos -= 20;
-    if (alertas.temperaturaBaixa || alertas.temperaturaAlta) pontos -= 20;
-    if (alertas.umidadeBaixa || alertas.umidadeAlta) pontos -= 15;
-    if (alertas.nivelBaixo) pontos -= 25;
+    // Penalidade por pH (Crítico: -25%)
+    if (alertas.phBaixo || alertas.phAlto) {
+        pontos -= 25.0;
+    }
 
-    if (pontos < 0) pontos = 0;
+    // Penalidade por EC/Nutrição (-20%)
+    if (alertas.ecBaixo || alertas.ecAlto) {
+        pontos -= 20.0;
+    }
 
-    saudeCultivo = pontos;
+    // Penalidade por Nível d'água DWC (Crítico: -25%)
+    if (alertas.nivelBaixo) {
+        pontos -= 25.0;
+    }
+
+    // Penalidade por Clima/Temperatura (-15%)
+    if (alertas.temperaturaBaixa || alertas.temperaturaAlta) {
+        pontos -= 15.0;
+    }
+
+    // Penalidade por Umidade (-15%)
+    if (alertas.umidadeBaixa || alertas.umidadeAlta) {
+        pontos -= 15.0;
+    }
+
+    if (pontos < 0.0) pontos = 0.0;
+
+    saudeCultivo = (int)pontos;
 }
 
 //=================================================
-// INICIALIZAÇÃO
+// RELATÓRIO DETALHADO DE MÚLTIPLOS PROBLEMAS
+//=================================================
+String obterMensagemAlertas() {
+    String msg = "";
+    int totalProblemas = 0;
+
+    if (alertas.phBaixo) { msg += "[pH Baixo] "; totalProblemas++; }
+    if (alertas.phAlto) { msg += "[pH Alto] "; totalProblemas++; }
+    if (alertas.ecBaixo) { msg += "[EC Baixa] "; totalProblemas++; }
+    if (alertas.ecAlto) { msg += "[EC Alta] "; totalProblemas++; }
+    if (alertas.temperaturaBaixa) { msg += "[Temp Ar Baixa] "; totalProblemas++; }
+    if (alertas.temperaturaAlta) { msg += "[Temp Ar Alta] "; totalProblemas++; }
+    if (alertas.umidadeBaixa) { msg += "[Umidade Baixa] "; totalProblemas++; }
+    if (alertas.umidadeAlta) { msg += "[Umidade Alta] "; totalProblemas++; }
+    if (alertas.nivelBaixo) { msg += "[Nivel Agua Baixo] "; totalProblemas++; }
+
+    if (totalProblemas == 0) {
+        return "Sistema Operando Normalmente (Sem Alertas)";
+    }
+    
+    return "Atencao! " + String(totalProblemas) + " problema(s) detectado(s): " + msg;
+}
+
+//=================================================
+// INICIALIZAÇÃO E ATUALIZAÇÃO
 //=================================================
 void iniciarDiagnostico() {
-    Serial.println("Diagnostico e motor de saude inicializados.");
+    Serial.println("Motor de Diagnóstico e Saúde Unificado.");
     limparAlertas();
 }
 
-//=================================================
-// ATUALIZAÇÃO GERAL DO DIAGNÓSTICO
-//=================================================
 void atualizarDiagnostico() {
     limparAlertas();
     diagnosticarPH();

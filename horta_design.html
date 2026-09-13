@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horta do Futuro - Conceito UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0B0F19] text-white h-screen flex overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-[#111827] border-r border-[#1F2937] flex flex-col justify-between">
+        <div>
+            <div class="p-6 border-b border-[#1F2937]">
+                <h1 class="text-xl font-bold text-emerald-400">HORTA DO FUTURO</h1>
+                <p class="text-xs text-slate-400 mt-1">DIGITAL TWIN V1.0</p>
+            </div>
+            
+            <nav class="p-4 space-y-2">
+                <a href="#" class="flex items-center gap-3 bg-emerald-500/10 text-emerald-400 px-4 py-3 rounded-lg font-semibold border border-emerald-500/20">
+                    <span>📊</span> Dashboard Principal
+                </a>
+                <a href="#" class="flex items-center gap-3 text-slate-400 hover:text-white hover:bg-[#1F2937] px-4 py-3 rounded-lg transition-colors">
+                    <span>🌱</span> Receitas & Nutrição
+                </a>
+                <a href="#" class="flex items-center gap-3 text-slate-400 hover:text-white hover:bg-[#1F2937] px-4 py-3 rounded-lg transition-colors">
+                    <span>📈</span> Gráficos & Logs
+                </a>
+                <a href="#" class="flex items-center gap-3 text-slate-400 hover:text-white hover:bg-[#1F2937] px-4 py-3 rounded-lg transition-colors">
+                    <span>⚙️</span> Configurações do ESP32
+                </a>
+            </nav>
+        </div>
+
+        <!-- SIMULADOR FLOAT -->
+        <div class="p-4 m-4 bg-[#1F2937] rounded-xl border border-[#374151]">
+            <p class="text-xs font-bold text-slate-400 mb-2">MODO SIMULAÇÃO</p>
+            <div class="flex items-center justify-between text-sm mb-2">
+                <span class="text-white">Velocidade</span>
+                <span class="text-emerald-400 font-bold">1x</span>
+            </div>
+            <input type="range" class="w-full accent-emerald-500" value="10">
+            <button class="w-full mt-3 bg-[#374151] hover:bg-[#4B5563] text-white text-xs py-2 rounded font-bold transition-colors">
+                PAUSAR TEMPO
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col relative overflow-y-auto">
+        
+        <!-- HEADER -->
+        <header class="h-16 border-b border-[#1F2937] flex items-center justify-between px-8 bg-[#111827]/80 backdrop-blur-md sticky top-0 z-10">
+            <div class="flex items-center gap-3">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span class="text-sm font-semibold text-emerald-400">HARDWARE ESP32 CONECTADO</span>
+            </div>
+            <div class="text-slate-300 font-mono text-lg font-bold">13:00 <span class="text-sm text-slate-500 font-sans ml-2">12/09/2026</span></div>
+        </header>
+
+        <!-- DASHBOARD GRID -->
+        <div class="p-8 max-w-6xl w-full">
+            <div class="mb-6 flex justify-between items-end">
+                <div>
+                    <h2 class="text-2xl font-bold">Visão Geral do Cultivo</h2>
+                    <p class="text-slate-400 mt-1">Alface Experimental #01 • Fase: <span class="text-emerald-400 font-semibold">VEGETATIVO</span></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-6">
+                <!-- CARD SAÚDE -->
+                <div class="col-span-4 bg-[#1A2234] border border-[#2A3441] rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden">
+                    <p class="text-sm font-bold text-slate-400 absolute top-4 left-4">SAÚDE BIOLÓGICA</p>
+                    <div class="w-32 h-32 rounded-full border-8 border-emerald-500/20 flex items-center justify-center mt-6">
+                        <div class="w-28 h-28 rounded-full border-4 border-emerald-500 flex items-center justify-center">
+                            <span class="text-4xl font-bold text-emerald-400">100<span class="text-lg">%</span></span>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-emerald-400 font-semibold text-sm">✅ Todas as métricas ideais</p>
+                </div>
+
+                <!-- CARD AR -->
+                <div class="col-span-4 bg-[#1A2234] border border-[#2A3441] rounded-2xl p-6">
+                    <p class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2"><span>🌡️</span> CLIMA E AR</p>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end border-b border-[#2A3441] pb-2">
+                            <span class="text-slate-400 text-sm">Temperatura</span>
+                            <span class="text-2xl font-bold text-white">24.5 <span class="text-sm text-slate-500">°C</span></span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-[#2A3441] pb-2">
+                            <span class="text-slate-400 text-sm">Umidade Relativa</span>
+                            <span class="text-2xl font-bold text-white">62.0 <span class="text-sm text-slate-500">%</span></span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-slate-400 text-sm">Exaustão</span>
+                            <span class="bg-[#374151] text-xs px-2 py-1 rounded text-white font-bold">AUTO (OFF)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD DWC -->
+                <div class="col-span-4 bg-[#1A2234] border border-[#2A3441] rounded-2xl p-6">
+                    <p class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2"><span>💧</span> SOLUÇÃO DWC</p>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end border-b border-[#2A3441] pb-2">
+                            <span class="text-slate-400 text-sm">pH</span>
+                            <span class="text-2xl font-bold text-blue-400">6.10</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-[#2A3441] pb-2">
+                            <span class="text-slate-400 text-sm">Condutividade (EC)</span>
+                            <span class="text-2xl font-bold text-orange-400">1.4 <span class="text-sm text-slate-500">mS/cm</span></span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-slate-400 text-sm">Nível do Tanque</span>
+                            <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded font-bold border border-emerald-500/30">OK (CHEIO)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLE RÁPIDO LUZ -->
+                <div class="col-span-12 bg-[#1A2234] border border-[#2A3441] rounded-2xl p-6 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-yellow-500/10 rounded-lg">
+                            <span class="text-2xl">💡</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-400">ILUMINAÇÃO PRINCIPAL (RELÉ 1)</p>
+                            <p class="text-white font-bold">Status: LIGADA (Ciclo 16h)</p>
+                        </div>
+                    </div>
+                    <div class="flex bg-[#0B0F19] rounded-lg p-1 border border-[#374151]">
+                        <button class="px-6 py-2 rounded-md bg-emerald-500/20 text-emerald-400 font-bold text-sm">AUTO</button>
+                        <button class="px-6 py-2 rounded-md text-slate-400 hover:text-white text-sm font-bold transition-colors">FORÇAR ON</button>
+                        <button class="px-6 py-2 rounded-md text-slate-400 hover:text-white text-sm font-bold transition-colors">FORÇAR OFF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

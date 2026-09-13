@@ -3,107 +3,50 @@
 
 #include <Arduino.h>
 
-//=================================================
-// PERFIL DA PLANTA
-//=================================================
-
-struct Planta
-{
+struct Planta {
     String nome;
-
-    float phMin;
-    float phMax;
-
-    float ecMin;
-    float ecMax;
-
-    float temperaturaMin;
-    float temperaturaMax;
-
-    float umidadeMin;
-    float umidadeMax;
-
+    float phMin, phMax;
+    float ecMin, ecMax;
+    float temperaturaMin, temperaturaMax;
+    float umidadeMin, umidadeMax;
     int horasLuz;
 };
 
-
-//=================================================
-// AMBIENTE
-//=================================================
-
-struct Ambiente
-{
+struct Ambiente {
     float temperaturaAr;
     float umidadeAr;
 };
 
-
-//=================================================
-// SOLUÇÃO NUTRITIVA
-//=================================================
-
-struct Solucao
-{
+struct Solucao {
     float temperaturaAgua;
-
     float ph;
-
     float ec;
-
     bool nivelOK;
 };
 
-
-//=================================================
-// ALERTAS
-//=================================================
-
-struct Alertas
-{
-    bool phBaixo;
-    bool phAlto;
-
-    bool ecBaixo;
-    bool ecAlto;
-
-    bool temperaturaBaixa;
-    bool temperaturaAlta;
-
-    bool umidadeBaixa;
-    bool umidadeAlta;
-
+struct Alertas {
+    bool phBaixo, phAlto;
+    bool ecBaixo, ecAlto;
+    bool temperaturaBaixa, temperaturaAlta;
+    bool umidadeBaixa, umidadeAlta;
     bool nivelBaixo;
 };
 
-
-//=================================================
-// ATUADORES
-//=================================================
-
-struct Atuadores
-{
+struct Atuadores {
     bool luz;
     bool ventilador;
     bool aeracao;
 };
 
-
-//=================================================
-// VARIÁVEIS GLOBAIS
-//=================================================
-
 extern Planta cultivoAtual;
-
 extern Ambiente ambiente;
-
 extern Solucao solucao;
-
 extern Alertas alertas;
-
 extern Atuadores atuadores;
-
 extern String mensagemSistema;
-
 extern int saudeCultivo;
+
+// 0 = AUTO (Relógio), 1 = FORÇAR ON, 2 = FORÇAR OFF
+extern int modoLuz; 
 
 #endif
