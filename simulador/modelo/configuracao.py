@@ -78,6 +78,13 @@ class ConfiguracaoCultivo:
         "VEGETATIVO",
     )
 
+    # Mapeamento de compatibilidade para corrigir plurais automaticamente
+    MAPA_CORRECAO_FASES = {
+        "MUDAS": "MUDA",
+        "SEMENTES": "SEMENTE",
+        "VEGETATIVOS": "VEGETATIVO",
+    }
+
     # ======================================================
     # CAMPOS ACEITOS PELA ReceitaFase
     # ======================================================
@@ -162,16 +169,21 @@ class ConfiguracaoCultivo:
         # FASE ATUAL
         # ==================================================
 
-        self.fase = (
+        fase_str = (
             str(fase)
             .strip()
             .upper()
         )
 
+        if fase_str in self.MAPA_CORRECAO_FASES:
+            fase_str = self.MAPA_CORRECAO_FASES[fase_str]
+
+        self.fase = fase_str
+
         if self.fase not in self.FASES_VALIDAS:
 
             raise ValueError(
-                f"Fase inválida: {self.fase}. "
+                f"Fase inválida: {fase}. "
                 f"Use: {', '.join(self.FASES_VALIDAS)}"
             )
 
@@ -215,6 +227,9 @@ class ConfiguracaoCultivo:
                     .strip()
                     .upper()
                 )
+
+                if nome_fase in self.MAPA_CORRECAO_FASES:
+                    nome_fase = self.MAPA_CORRECAO_FASES[nome_fase]
 
                 if nome_fase not in self.FASES_VALIDAS:
 
@@ -355,7 +370,7 @@ class ConfiguracaoCultivo:
         """
         Reconstrói uma ReceitaFase a partir de um dicionário.
 
-        Isso é importante porque snapshot() pode conter
+        Isto é importante porque snapshot() pode conter
         informações calculadas/formatadas como:
 
             inicio_luz
@@ -410,6 +425,9 @@ class ConfiguracaoCultivo:
             .strip()
             .upper()
         )
+
+        if fase in self.MAPA_CORRECAO_FASES:
+            fase = self.MAPA_CORRECAO_FASES[fase]
 
         if fase not in self.FASES_VALIDAS:
 
@@ -470,8 +488,15 @@ class ConfiguracaoCultivo:
     @property
     def receita_atual(self):
 
+        fase_atual = self.fase
+        if fase_atual in self.MAPA_CORRECAO_FASES:
+            fase_atual = self.MAPA_CORRECAO_FASES[fase_atual]
+
+        if fase_atual not in self.receitas:
+            self._garantir_receita_fase(fase_atual)
+
         return self.receitas[
-            self.fase
+            fase_atual
         ]
 
     # ======================================================
@@ -488,6 +513,9 @@ class ConfiguracaoCultivo:
             .strip()
             .upper()
         )
+
+        if fase in self.MAPA_CORRECAO_FASES:
+            fase = self.MAPA_CORRECAO_FASES[fase]
 
         if fase not in self.FASES_VALIDAS:
 
@@ -521,6 +549,9 @@ class ConfiguracaoCultivo:
             .upper()
         )
 
+        if fase in self.MAPA_CORRECAO_FASES:
+            fase = self.MAPA_CORRECAO_FASES[fase]
+
         if fase not in self.FASES_VALIDAS:
 
             raise ValueError(
@@ -550,6 +581,9 @@ class ConfiguracaoCultivo:
             .strip()
             .upper()
         )
+
+        if fase in self.MAPA_CORRECAO_FASES:
+            fase = self.MAPA_CORRECAO_FASES[fase]
 
         if fase not in self.FASES_VALIDAS:
 

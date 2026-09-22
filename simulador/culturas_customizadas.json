@@ -1,0 +1,28 @@
+{
+    "LOLOLOLOLOLO": {
+        "ph_min": 5.8,
+        "ph_max": 6.3,
+        "ec_min": 1.2,
+        "ec_max": 2.0,
+        "temp_ar_min": 18.0,
+        "temp_ar_max": 28.0,
+        "temp_agua_min": 18.0,
+        "temp_agua_max": 24.0,
+        "umidade_min": 60.0,
+        "umidade_max": 80.0,
+        "fotoperiodo_horas": 16.0
+    },
+    "AWDAFGSGWSGS": {
+        "ph_min": 5.8,
+        "ph_max": 6.3,
+        "ec_min": 1.2,
+        "ec_max": 2.0,
+        "temp_ar_min": 18.0,
+        "temp_ar_max": 28.0,
+        "temp_agua_min": 18.0,
+        "temp_agua_max": 24.0,
+        "umidade_min": 60.0,
+        "umidade_max": 80.0,
+        "fotoperiodo_horas": 24.0
+    }
+}

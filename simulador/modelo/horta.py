@@ -5,6 +5,7 @@ DIGITAL TWIN - MOTOR BIOLÓGICO COM SUPORTE A ESP32
 ============================================================
 """
 import json
+import os
 import urllib.request
 from modelo.configuracao import ConfiguracaoCultivo
 from modelo.relogio_virtual import RelogioVirtual
@@ -31,7 +32,14 @@ class Horta:
         self.nome_fertilizante = "Flex Azul + Vermelho (A+B)"
         self.gramas_por_litro_recomendado = 0.84  
         self.taxa_ph_down = 0.5       
-        self.taxa_ph_up = 0.5         
+        self.taxa_ph_up = 0.5          
+
+        # Automação Independente (Timers & Duas Fans)
+        self.perfil_automacao_ativo = "Padrão Industrial DWC"
+        self.bomba_agua_liga_min = 15
+        self.bomba_agua_desliga_min = 45
+        self.temp_exaustor_on = 28.0      # Fan de Exaustão (Saída de ar quente)
+        self.temp_insuflador_on = 25.0    # Fan de Insuflação (Entrada de ar fresco)
 
         # Sensores
         self.temperatura_ar = 24.5
@@ -46,10 +54,11 @@ class Horta:
         self.status = "SAUDÁVEL"
         self.alertas = []
 
-        # Atuadores e Dimmer / PWM
-        self.ventilacao = False
+        # Atuadores e Relés
+        self.ventilacao_exaustor = False
+        self.ventilacao_insuflador = False
         self.bomba = False
-        self.iluminacao = False
+        self.iluminacao = False  # Controlado por Relé (127V)
         self.intensidade_iluminacao_pwm = 0
         self.dimmer_manual_nivel = 100.0
         self.modo_dimmer_manual = False
@@ -144,6 +153,14 @@ class Horta:
             return "BAIXO"
         return "ADEQUADO"
 
+    def aplicar_parametros_automacao(self, bomba_liga, bomba_desliga, exaustor_on, insuflador_on, nome_perfil="Personalizado"):
+        """Aplica parâmetros personalizados de automação de forma independente da receita."""
+        self.bomba_agua_liga_min = int(bomba_liga)
+        self.bomba_agua_desliga_min = int(bomba_desliga)
+        self.temp_exaustor_on = float(exaustor_on)
+        self.temp_insuflador_on = float(insuflador_on)
+        self.perfil_automacao_ativo = nome_perfil
+
     def calcular_receita_dosagem(self):
         litros_atuais = max(0.5, self.volume_solucao_ml / 1000.0)
         ec_alvo = (self.config.ec_min + self.config.ec_max) / 2.0
@@ -201,36 +218,15 @@ class Horta:
         fim_minutos = (inicio_minutos + duracao_luz_minutos) % 1440
         agora_minutos = self.hora_atual * 60 + self.minuto_atual
 
-        rampa_minutos = 15
-
         no_horario_luz = False
         if inicio_minutos < fim_minutos:
             no_horario_luz = inicio_minutos <= agora_minutos < fim_minutos
         else:
             no_horario_luz = agora_minutos >= inicio_minutos or agora_minutos < fim_minutos
 
-        teto_intensidade = self.dimmer_manual_nivel if self.modo_dimmer_manual else 100.0
-
-        if no_horario_luz:
-            minutos_desde_inicio = (agora_minutos - inicio_minutos) % 1440
-            if minutos_desde_inicio < rampa_minutos:
-                self.intensidade_iluminacao_pwm = int(teto_intensidade * (minutos_desde_inicio / rampa_minutos))
-            else:
-                minutos_ate_fim = (fim_minutos - agora_minutos) % 1440
-                if minutos_ate_fim < rampa_minutos:
-                    self.intensidade_iluminacao_pwm = int(teto_intensidade * (minutos_ate_fim / rampa_minutos))
-                else:
-                    self.intensidade_iluminacao_pwm = int(teto_intensidade)
-            self.iluminacao = self.intensidade_iluminacao_pwm > 0
-        else:
-            minutos_ate_inicio = (inicio_minutos - agora_minutos) % 1440
-            if minutos_ate_inicio < rampa_minutos:
-                progresso = 1.0 - (minutos_ate_inicio / rampa_minutos)
-                self.intensidade_iluminacao_pwm = int(teto_intensidade * progresso)
-                self.iluminacao = self.intensidade_iluminacao_pwm > 0
-            else:
-                self.intensidade_iluminacao_pwm = 0
-                self.iluminacao = False
+        # Lâmpada 127V acionada por Relé (Simples e Direto)
+        self.iluminacao = no_horario_luz
+        self.intensidade_iluminacao_pwm = 100 if no_horario_luz else 0
 
     def esta_no_periodo_luz(self):
         inicio = self.config.inicio_luz_hora * 60 + self.config.inicio_luz_minuto
@@ -273,11 +269,17 @@ class Horta:
         configuracao = obter_configuracao_cultura(nome)
         self.aplicar_configuracao(configuracao)
 
-    def ligar_ventilacao(self):
-        self.ventilacao = True
+    def ligar_ventilacao_exaustor(self):
+        self.ventilacao_exaustor = True
 
-    def desligar_ventilacao(self):
-        self.ventilacao = False
+    def desligar_ventilacao_exaustor(self):
+        self.ventilacao_exaustor = False
+
+    def ligar_ventilacao_insuflador(self):
+        self.ventilacao_insuflador = True
+
+    def desligar_ventilacao_insuflador(self):
+        self.ventilacao_insuflador = False
 
     def ligar_bomba(self):
         if self.nivel_agua > 10:
@@ -349,10 +351,17 @@ class Horta:
         return round(self.saude, 1)
 
     def executar_automacao(self):
-        if self.temperatura_ar > self.config.temperatura_ar_max:
-            self.ligar_ventilacao()
+        # Lógica da Fan de Exaustão (Saída de Ar Quente)
+        if self.temperatura_ar > self.temp_exaustor_on:
+            self.ligar_ventilacao_exaustor()
         else:
-            self.desligar_ventilacao()
+            self.desligar_ventilacao_exaustor()
+
+        # Lógica da Fan de Insuflação (Entrada de Ar Fresco / Renovação)
+        if self.temperatura_ar > self.temp_insuflador_on or self.umidade_ar > 75.0:
+            self.ligar_ventilacao_insuflador()
+        else:
+            self.desligar_ventilacao_insuflador()
 
         if self.nivel_agua <= 10:
             self.desligar_bomba()
@@ -370,12 +379,19 @@ class Horta:
         self.volume_solucao_ml = self.capacidade_reservatorio_ml
         self.nivel_agua = 100.0
 
+        self.perfil_automacao_ativo = "Padrão Industrial DWC"
+        self.bomba_agua_liga_min = 15
+        self.bomba_agua_desliga_min = 45
+        self.temp_exaustor_on = 28.0
+        self.temp_insuflador_on = 25.0
+
         self.historico_dosagem = []
         self.saude = 100.0
         self.status = "SAUDÁVEL"
         self.alertas = []
 
-        self.ventilacao = False
+        self.ventilacao_exaustor = False
+        self.ventilacao_insuflador = False
         self.bomba = False
         self.iluminacao = False
         self.intensidade_iluminacao_pwm = 0
@@ -404,12 +420,18 @@ class Horta:
             "volume_solucao_ml": self.volume_solucao_ml,
             "nivel_agua": self.nivel_agua,
             "nivel_agua_status": self.nivel_agua_status(),
+            "perfil_automacao_ativo": self.perfil_automacao_ativo,
+            "bomba_agua_liga_min": self.bomba_agua_liga_min,
+            "bomba_agua_desliga_min": self.bomba_agua_desliga_min,
+            "temp_exaustor_on": self.temp_exaustor_on,
+            "temp_insuflador_on": self.temp_insuflador_on,
             "dosagem_recomendada": self.calcular_receita_dosagem(),
             "historico_dosagem": list(self.historico_dosagem),
             "saude": round(self.saude, 1),
             "status": self.status,
             "alertas": self.alertas,
-            "ventilacao": self.ventilacao,
+            "ventilacao_exaustor": self.ventilacao_exaustor,
+            "ventilacao_insuflador": self.ventilacao_insuflador,
             "bomba": self.bomba,
             "iluminacao": self.iluminacao,
             "intensidade_iluminacao_pwm": self.intensidade_iluminacao_pwm,
