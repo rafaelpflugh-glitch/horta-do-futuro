@@ -1,12 +1,24 @@
-import customtkinter as ctk
-import json
 import os
+import sys
+
+# Mapeia os caminhos absolutos para garantir que o Python encontre a pasta 'modelo'
+_INTERFACE_DIR = os.path.dirname(os.path.abspath(__file__))
+_SIMULADOR_DIR = os.path.dirname(_INTERFACE_DIR)
+_RAIZ_DIR = os.path.dirname(_SIMULADOR_DIR)
+
+if _RAIZ_DIR not in sys.path:
+    sys.path.insert(0, _RAIZ_DIR)
+if _SIMULADOR_DIR not in sys.path:
+    sys.path.insert(0, _SIMULADOR_DIR)
+
+import json
 import csv
 import threading
 from datetime import datetime
 from tkinter import filedialog
 from tkinter import messagebox
 
+import customtkinter as ctk
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -32,7 +44,7 @@ class JanelaPrincipal(ctk.CTk):
         ctk.set_appearance_mode("Dark")
         ctk.set_default_color_theme("blue")
 
-        self.title("HORTA DO FUTURO — Digital Twin & Hardware Controller")
+        self.title("HORTA DO FUTURO — Digital Twin & Computador de Plantas")
         self.geometry("1560x980")
         self.minsize(1250, 820)
         self.configure(fg_color="#02040A")
@@ -85,12 +97,13 @@ class JanelaPrincipal(ctk.CTk):
 
     # ================= ARQUIVOS E CACHE =================
     def carregar_cultivos_disco(self):
-        caminho = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cultivos_salvos.json")
+        caminho = os.path.join(_RAIZ_DIR, "cultivos_salvos.json")
         if os.path.exists(caminho):
             try:
                 with open(caminho, "r", encoding="utf-8") as f:
                     return json.load(f)
-            except: pass
+            except Exception:
+                pass
         return {
             "Alface Experimental #01": {
                 "cultura": "ALFACE", "fase": "VEGETATIVO", "fotoperiodo": 18.0, 
@@ -103,32 +116,35 @@ class JanelaPrincipal(ctk.CTk):
         }
 
     def salvar_cultivos_disco(self):
-        caminho = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cultivos_salvos.json")
+        caminho = os.path.join(_RAIZ_DIR, "cultivos_salvos.json")
         try:
             with open(caminho, "w", encoding="utf-8") as f:
                 json.dump(self.cultivos_salvos_cache, f, indent=4, ensure_ascii=False)
-        except: pass
+        except Exception:
+            pass
 
     def carregar_culturas_customizadas_disco(self):
-        caminho = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "culturas_customizadas.json")
+        caminho = os.path.join(_RAIZ_DIR, "culturas_customizadas.json")
         if os.path.exists(caminho):
             try:
                 with open(caminho, "r", encoding="utf-8") as f:
                     return json.load(f)
-            except: pass
+            except Exception:
+                pass
         return {}
 
     def salvar_culturas_customizadas_disco(self):
-        caminho = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "culturas_customizadas.json")
+        caminho = os.path.join(_RAIZ_DIR, "culturas_customizadas.json")
         try:
             with open(caminho, "w", encoding="utf-8") as f:
                 json.dump(self.culturas_customizadas_cache, f, indent=4, ensure_ascii=False)
-        except: pass
+        except Exception:
+            pass
 
     def listar_todas_culturas(self):
-        base = listar_culturas()
-        custom = list(self.culturas_customizadas_cache.keys())
-        return list(set(base + custom))
+        base = list(listar_culturas())
+        custom = [c for c in self.culturas_customizadas_cache.keys() if c not in base]
+        return base + custom
 
     # ================= CRIAÇÃO DA INTERFACE =================
     def criar_interface(self):
@@ -138,17 +154,18 @@ class JanelaPrincipal(ctk.CTk):
         self.sidebar.pack_propagate(False)
 
         topo_sidebar = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        topo_sidebar.pack(fill="x", padx=20, pady=26)
+        topo_sidebar.pack(fill="x", padx=20, pady=24)
 
         ctk.CTkLabel(topo_sidebar, text="HORTA DO FUTURO", font=("Segoe UI", 18, "bold"), text_color="#F8FAFC").pack(anchor="w")
-        ctk.CTkLabel(topo_sidebar, text="INDUSTRIAL DIGITAL TWIN", font=("Segoe UI", 11, "bold"), text_color="#64748B").pack(anchor="w", pady=(3, 0))
+        ctk.CTkLabel(topo_sidebar, text="DIGITAL TWIN & COMPUTADOR DE PLANTAS", font=("Segoe UI", 10, "bold"), text_color="#38BDF8").pack(anchor="w", pady=(4, 0))
 
         nav_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        nav_frame.pack(fill="x", padx=14, pady=12)
+        nav_frame.pack(fill="x", padx=14, pady=8)
 
         itens_menu = [
             ("dashboard", "📊 Painel & Controles"),
             ("comparativo", "⚖️ Comparativo de Sincronia"),
+            ("calibracao", "🎛️ Calibração de Sensores"),
             ("nutricao", "🌱 Receitas & Cultivo"),
             ("graficos", "📈 Gráficos & Logs"),
             ("config", "⚙️ Configurações ESP32")
@@ -156,12 +173,12 @@ class JanelaPrincipal(ctk.CTk):
 
         for chave, texto in itens_menu:
             btn = ctk.CTkButton(
-                nav_frame, text=texto, anchor="w", height=46,
+                nav_frame, text=texto, anchor="w", height=42,
                 fg_color="transparent", text_color="#94A3B8",
                 hover_color="#0F172A", font=("Segoe UI", 13, "bold"),
                 command=lambda c=chave: self.trocar_tela(c)
             )
-            btn.pack(fill="x", pady=4)
+            btn.pack(fill="x", pady=3)
             self.botoes_sidebar[chave] = btn
 
         # Box Simulador Sidebar
@@ -169,46 +186,46 @@ class JanelaPrincipal(ctk.CTk):
         sim_box.pack(side="bottom", fill="x", padx=14, pady=14)
 
         self.label_titulo_sim_sidebar = ctk.CTkLabel(sim_box, text="CONTROLE DO SIMULADOR", font=("Segoe UI", 12, "bold"), text_color="#F59E0B")
-        self.label_titulo_sim_sidebar.pack(pady=(14, 6))
+        self.label_titulo_sim_sidebar.pack(pady=(12, 4))
         
         relogio_box = ctk.CTkFrame(sim_box, fg_color="#02040A", corner_radius=8, border_width=1, border_color="#1E293B")
-        relogio_box.pack(fill="x", padx=14, pady=(0, 10))
-        self.label_relogio_topo = ctk.CTkLabel(relogio_box, text=datetime.now().strftime("%H:%M  %d/%m/%Y"), font=("Segoe UI", 14, "bold"), text_color="#F59E0B")
-        self.label_relogio_topo.pack(pady=8)
+        relogio_box.pack(fill="x", padx=14, pady=(0, 8))
+        self.label_relogio_topo = ctk.CTkLabel(relogio_box, text=datetime.now().strftime("%H:%M  %d/%m/%Y"), font=("Segoe UI", 13, "bold"), text_color="#F59E0B")
+        self.label_relogio_topo.pack(pady=6)
 
         vel_box = ctk.CTkFrame(sim_box, fg_color="transparent")
         vel_box.pack(fill="x", padx=14, pady=2)
-        ctk.CTkLabel(vel_box, text="Velocidade:", font=("Segoe UI", 13), text_color="#94A3B8").pack(side="left")
-        self.label_vel_sidebar = ctk.CTkLabel(vel_box, text="1x", font=("Segoe UI", 13, "bold"), text_color="#F59E0B")
+        ctk.CTkLabel(vel_box, text="Velocidade:", font=("Segoe UI", 12), text_color="#94A3B8").pack(side="left")
+        self.label_vel_sidebar = ctk.CTkLabel(vel_box, text="1x", font=("Segoe UI", 12, "bold"), text_color="#F59E0B")
         self.label_vel_sidebar.pack(side="right")
 
         self.slider_vel_sidebar = ctk.CTkSlider(
             sim_box, from_=1, to=10, number_of_steps=9, command=self.mudar_velocidade,
-            progress_color="#F59E0B", button_color="#F8FAFC", button_hover_color="#E2E8F0", fg_color="#02040A", height=16
+            progress_color="#F59E0B", button_color="#F8FAFC", button_hover_color="#E2E8F0", fg_color="#02040A", height=14
         )
-        self.slider_vel_sidebar.pack(fill="x", padx=14, pady=8)
+        self.slider_vel_sidebar.pack(fill="x", padx=14, pady=6)
         self.slider_vel_sidebar.set(1)
 
         botoes_tempo_frame = ctk.CTkFrame(sim_box, fg_color="transparent")
-        botoes_tempo_frame.pack(fill="x", padx=12, pady=4)
+        botoes_tempo_frame.pack(fill="x", padx=12, pady=2)
 
         for texto, minutos in [("+1h", 60), ("+1d", 1440)]:
             ctk.CTkButton(
-                botoes_tempo_frame, text=texto, command=lambda m=minutos: self.avancar_tempo(m), height=32, width=60,
+                botoes_tempo_frame, text=texto, command=lambda m=minutos: self.avancar_tempo(m), height=30, width=60,
                 fg_color="#0F172A", hover_color="#1E293B", text_color="#F8FAFC", font=("Segoe UI", 12, "bold"), corner_radius=6
-            ).pack(side="left", expand=True, padx=3)
+            ).pack(side="left", expand=True, padx=2)
 
         self.btn_pausa_tempo = ctk.CTkButton(
-            sim_box, text="▶ INICIAR SIMULADOR", command=self.alternar_demonstracao, height=38,
-            fg_color="#F59E0B", hover_color="#D97706", text_color="#02040A", font=("Segoe UI", 13, "bold")
+            sim_box, text="▶ INICIAR SIMULADOR", command=self.alternar_demonstracao, height=36,
+            fg_color="#F59E0B", hover_color="#D97706", text_color="#02040A", font=("Segoe UI", 12, "bold")
         )
-        self.btn_pausa_tempo.pack(fill="x", padx=14, pady=(10, 8))
+        self.btn_pausa_tempo.pack(fill="x", padx=14, pady=(8, 6))
 
         self.btn_reset = ctk.CTkButton(
-            sim_box, text="↺ RESETAR CULTIVO", command=self.resetar_planta, height=34,
+            sim_box, text="↺  RESETAR CULTIVO", command=self.resetar_planta, height=38,
             fg_color="#1E293B", hover_color="#334155", text_color="#F8FAFC", font=("Segoe UI", 12, "bold")
         )
-        self.btn_reset.pack(fill="x", padx=14, pady=(0, 14))
+        self.btn_reset.pack(fill="x", padx=14, pady=(0, 12))
 
         # Main Container
         self.main_container = ctk.CTkFrame(self, fg_color="#02040A", corner_radius=0)
@@ -241,6 +258,7 @@ class JanelaPrincipal(ctk.CTk):
         self.telas = {
             "dashboard": self.criar_tela_dashboard(),
             "comparativo": self.criar_tela_comparativo(),
+            "calibracao": self.criar_tela_calibracao(),
             "nutricao": self.criar_tela_nutricao(),
             "graficos": self.criar_tela_graficos(),
             "config": self.criar_tela_configuracao()
@@ -261,7 +279,7 @@ class JanelaPrincipal(ctk.CTk):
         frame = ctk.CTkFrame(self.content_area, fg_color="transparent")
         titulo_box = ctk.CTkFrame(frame, fg_color="transparent")
         titulo_box.pack(fill="x", pady=(0, 14))
-        self.label_titulo_painel = ctk.CTkLabel(titulo_box, text="Painel Geral • Gêmeo Digital", font=("Segoe UI", 24, "bold"), text_color="#F8FAFC")
+        self.label_titulo_painel = ctk.CTkLabel(titulo_box, text="Painel Geral • Gêmeo Digital & Computador de Plantas", font=("Segoe UI", 24, "bold"), text_color="#F8FAFC")
         self.label_titulo_painel.pack(anchor="w")
         
         self.label_sub_cultivo = ctk.CTkLabel(titulo_box, text="ALFACE EXPERIMENTAL #01 • Fase: VEGETATIVO • Dia: 0 (Simulador)", font=("Segoe UI", 14, "bold"), text_color="#94A3B8")
@@ -293,7 +311,7 @@ class JanelaPrincipal(ctk.CTk):
         self.label_saude_status_texto = ctk.CTkLabel(box_status, text="✅ Condições ideais para o desenvolvimento", font=("Segoe UI", 13), text_color="#10B981", wraplength=340, justify="left")
         self.label_saude_status_texto.pack(side="left", fill="y", expand=True, pady=4)
 
-        # Função auxiliar corrigida para retornar o widget lbl corretamente
+        # Função auxiliar para mini cards
         def criar_mini_card(parent, row, col, titulo, valor_padrao, cor_valor):
             f = ctk.CTkFrame(parent, fg_color="#02040A", corner_radius=10, border_width=1, border_color="#1E293B")
             f.grid(row=row, column=col, sticky="nsew", padx=6, pady=6)
@@ -329,6 +347,36 @@ class JanelaPrincipal(ctk.CTk):
         self.label_dash_ph = criar_mini_card(grid_dwc, 0, 1, "🧪 pH Solução", "6.10", "#38BDF8")
         self.label_dash_ec = criar_mini_card(grid_dwc, 1, 0, "⚡ EC Nutrientes", "1.4 mS/cm", "#FB923C")
         self.label_dash_nivel = criar_mini_card(grid_dwc, 1, 1, "🪣 Nível Tanque", "100%", "#10B981")
+
+        # 4. Controle de Atuadores & Relés (Espelhado Bidirecionalmente com TFT do ESP32)
+        c4 = ctk.CTkFrame(col_esq, fg_color="#050B14", corner_radius=14, border_width=1, border_color="#1E293B")
+        c4.pack(fill="x", pady=8)
+        ctk.CTkLabel(c4, text="CONTROLE DE ATUADORES & RELÉS (ESPELHADO ESP32 / TFT)", font=("Segoe UI", 12, "bold"), text_color="#38BDF8").pack(anchor="w", padx=20, pady=(16, 6))
+
+        def criar_linha_atuador(parent, titulo, chave_atuador):
+            f_row = ctk.CTkFrame(parent, fg_color="#02040A", corner_radius=8, border_width=1, border_color="#1E293B")
+            f_row.pack(fill="x", padx=14, pady=4)
+            ctk.CTkLabel(f_row, text=titulo, font=("Segoe UI", 12, "bold"), text_color="#CBD5E1").pack(side="left", padx=14, pady=10)
+            seg = ctk.CTkSegmentedButton(
+                f_row, values=["AUTO", "ON", "OFF"],
+                command=lambda val, k=chave_atuador: self.mudar_modo_atuador(k, val),
+                font=("Segoe UI", 11, "bold"), height=30, width=180,
+                fg_color="#050B14", selected_color="#38BDF8", selected_hover_color="#0284C7",
+                unselected_color="#050B14", unselected_hover_color="#1E293B"
+            )
+            seg.pack(side="right", padx=12, pady=8)
+            seg.set("AUTO")
+            return seg
+
+        self.seg_modo_luz = criar_linha_atuador(c4, "☀️ Painel LED Grow (Relé 1):", "luz")
+        self.seg_modo_exaustor = criar_linha_atuador(c4, "💨 Exaustor Climático (Relé 2):", "exaustor")
+        self.seg_modo_bomba = criar_linha_atuador(c4, "💧 Bomba Submersa DWC (Relé 3):", "bomba_agua")
+
+        f_ar_dwc = ctk.CTkFrame(c4, fg_color="#02040A", corner_radius=8, border_width=1, border_color="#1E293B")
+        f_ar_dwc.pack(fill="x", padx=14, pady=(4, 14))
+        ctk.CTkLabel(f_ar_dwc, text="🫧 Oxigenador DWC (Relé 4 - Contínuo):", font=("Segoe UI", 12, "bold"), text_color="#CBD5E1").pack(side="left", padx=14, pady=10)
+        self.label_status_bomba_ar = ctk.CTkLabel(f_ar_dwc, text="OPERANDO (OK)", font=("Segoe UI", 12, "bold"), text_color="#10B981")
+        self.label_status_bomba_ar.pack(side="right", padx=16, pady=10)
 
         # ================= COLUNA DIREITA (SIMULADOR) =================
         col_dir = ctk.CTkFrame(grid_principal, fg_color="#050B14", corner_radius=14, border_width=1, border_color="#1E293B")
@@ -433,6 +481,101 @@ class JanelaPrincipal(ctk.CTk):
             btn.configure(fg_color="#1E293B" if k == chave else "#0F172A", text_color="#F59E0B" if k == chave else "#94A3B8")
         self.atualizar_interface()
 
+    # ================= TELA DE CALIBRAÇÃO DE SENSORES =================
+    def criar_tela_calibracao(self):
+        frame = ctk.CTkFrame(self.content_area, fg_color="transparent")
+        frame.grid_columnconfigure((0, 1), weight=1, uniform="cal")
+        frame.grid_rowconfigure(0, weight=1)
+
+        c_cal = ctk.CTkFrame(frame, fg_color="#050B14", corner_radius=14, border_width=1, border_color="#1E293B")
+        c_cal.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+
+        ctk.CTkLabel(c_cal, text="🎛️ PAINEL DE CALIBRAÇÃO DE SENSORES", font=("Segoe UI", 16, "bold"), text_color="#38BDF8").pack(anchor="w", padx=22, pady=(22, 4))
+        ctk.CTkLabel(c_cal, text="Ajuste os fatores de correção para alinhar as leituras da bancada física.", font=("Segoe UI", 12), text_color="#94A3B8").pack(anchor="w", padx=22, pady=(0, 18))
+
+        f_form = ctk.CTkFrame(c_cal, fg_color="#02040A", corner_radius=10, border_width=1, border_color="#1E293B")
+        f_form.pack(fill="x", padx=22, pady=10)
+
+        f_cp1 = ctk.CTkFrame(f_form, fg_color="transparent")
+        f_cp1.pack(fill="x", padx=18, pady=14)
+        ctk.CTkLabel(f_cp1, text="Offset Sonda pH (+/-):", font=("Segoe UI", 13, "bold"), text_color="#CBD5E1").pack(side="left")
+        self.entry_offset_ph = ctk.CTkEntry(f_cp1, width=90, fg_color="#050B14", border_color="#1E293B", justify="center", font=("Segoe UI", 13, "bold"), height=38)
+        self.entry_offset_ph.pack(side="right")
+        self.entry_offset_ph.insert(0, "0.0")
+
+        f_cp2 = ctk.CTkFrame(f_form, fg_color="transparent")
+        f_cp2.pack(fill="x", padx=18, pady=(0, 14))
+        ctk.CTkLabel(f_cp2, text="Fator Ganho Condutividade (EC):", font=("Segoe UI", 13, "bold"), text_color="#CBD5E1").pack(side="left")
+        self.entry_fator_ec = ctk.CTkEntry(f_cp2, width=90, fg_color="#050B14", border_color="#1E293B", justify="center", font=("Segoe UI", 13, "bold"), height=38)
+        self.entry_fator_ec.pack(side="right")
+        self.entry_fator_ec.insert(0, "1.0")
+
+        ctk.CTkButton(c_cal, text="⚡ APLICAR & ENVIAR AO ESP32", command=self.sincronizar_calibracao_esp32, height=42, fg_color="#38BDF8", hover_color="#0284C7", text_color="#02040A", font=("Segoe UI", 13, "bold"), corner_radius=6).pack(fill="x", padx=22, pady=18)
+
+        c_info = ctk.CTkFrame(frame, fg_color="#050B14", corner_radius=14, border_width=1, border_color="#1E293B")
+        c_info.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
+        ctk.CTkLabel(c_info, text="INSTRUÇÕES DE CALIBRAÇÃO", font=("Segoe UI", 12, "bold"), text_color="#64748B").pack(anchor="w", padx=22, pady=(22, 10))
+        
+        texto_instrucoes = (
+            "1. pH Offset:\n"
+            "   Coloque a sonda no tampão pH 7.0. Se a leitura indicar 7.2, ajusta-se o Offset para -0.2.\n\n"
+            "2. Fator Ganho EC:\n"
+            "   Submerja a sonda na solução padrão 1.41 mS/cm. Se a leitura for 1.30, divida 1.41/1.30 "
+            "e insira o multiplicador correspondente.\n\n"
+            "3. Envio ao Hardware:\n"
+            "   Certifique-se de que o 'Modo ESP32' está ativo no topo para transmitir via Serial."
+        )
+        ctk.CTkLabel(c_info, text=texto_instrucoes, font=("Segoe UI", 12), text_color="#CBD5E1", justify="left", wraplength=420).pack(anchor="w", padx=22, pady=10)
+
+        return frame
+
+    def mudar_modo_atuador(self, atuador, valor_str):
+        mapa = {"AUTO": 0, "ON": 1, "OFF": 2}
+        modo = mapa.get(valor_str, 0)
+        if atuador == "luz":
+            self.horta.modo_luz = modo
+        elif atuador == "exaustor":
+            self.horta.modo_exaustor = modo
+        elif atuador == "bomba_agua":
+            self.horta.modo_bomba_agua = modo
+
+        self.horta.executar_automacao()
+        self.atualizar_interface()
+
+        if self.modo_hardware_real and self.ser and self.ser.is_open:
+            pacote = {
+                "cmd": "set_actuators",
+                "modo_luz": self.horta.modo_luz,
+                "modo_exaustor": self.horta.modo_exaustor,
+                "modo_bomba_agua": self.horta.modo_bomba_agua
+            }
+            self.enviar_pacote_serial_raw(pacote)
+            self.atualizar_log_serial(f"[COMANDO -> ESP32] Atuador '{atuador}' definido para {valor_str}\n")
+
+    def sincronizar_calibracao_esp32(self):
+        try:
+            offset_ph = float(self.entry_offset_ph.get().replace(",", "."))
+            fator_ec = float(self.entry_fator_ec.get().replace(",", "."))
+        except ValueError:
+            messagebox.showerror("Erro de Valor", "Insira valores numéricos válidos para offset e ganho.")
+            return
+
+        self.horta.offset_ph = offset_ph
+        self.horta.fator_ec = max(0.1, fator_ec)
+
+        if not self.modo_hardware_real or not self.ser or not self.ser.is_open:
+            self.atualizar_log_serial(f"[CALIBRAÇÃO LOCAL] Offset pH: {offset_ph:.2f} | Fator EC: {fator_ec:.2f} (Modo Simulador)\n")
+            messagebox.showinfo("Calibração Salva", f"Parâmetros aplicados no simulador:\nOffset pH: {offset_ph:.2f}\nFator EC: {fator_ec:.2f}")
+            return
+
+        pacote_calib = {
+            "cmd": "set_calibration",
+            "offset_ph": offset_ph,
+            "fator_ec": fator_ec
+        }
+        self.enviar_pacote_serial_raw(pacote_calib)
+        self.atualizar_log_serial(f"[SUCESSO] Calibração transmitida ao ESP32! Offset pH: {offset_ph:.2f}, Fator EC: {fator_ec:.2f}\n")
+
     # ================= TELA DE NUTRIÇÃO =================
     def criar_tela_nutricao(self):
         frame = ctk.CTkFrame(self.content_area, fg_color="transparent")
@@ -488,7 +631,14 @@ class JanelaPrincipal(ctk.CTk):
         ctk.CTkLabel(f_guia_top, text="💡 GUIA DE CORREÇÃO NUTRICIONAL", font=("Segoe UI", 12, "bold"), text_color="#10B981").pack(anchor="w")
         
         self.label_guia_nutricional = ctk.CTkLabel(guia_box, text="Calculando orientações...", font=("Segoe UI", 11), text_color="#CBD5E1", justify="left")
-        self.label_guia_nutricional.pack(anchor="w", padx=16, pady=(0, 12))
+        self.label_guia_nutricional.pack(anchor="w", padx=16, pady=(0, 8))
+
+        ctk.CTkButton(
+            guia_box, text="🧪 APLICAR CORREÇÃO NO SIMULADOR",
+            command=self.aplicar_correcao_nutricional_simulador,
+            height=30, fg_color="#064E3B", hover_color="#047857",
+            text_color="#A7F3D0", font=("Segoe UI", 11, "bold"), corner_radius=6
+        ).pack(fill="x", padx=16, pady=(0, 12))
 
         # ================= COLUNA 2: AUTOMAÇÃO =================
         col2 = ctk.CTkFrame(frame, fg_color="#050B14", corner_radius=14, border_width=1, border_color="#1E293B")
@@ -585,105 +735,154 @@ class JanelaPrincipal(ctk.CTk):
         self.preencher_configuracao()
         return frame
 
-    # ================= MODAIS & AÇÕES =================
+    # ================= MODAIS & AÇÕES (CORRIGIDOS) =================
     def abrir_modal_automacao(self):
-        top = ctk.CTkToplevel(self)
-        top.title("Configurar Automação (Ciclos & Clima)")
-        top.geometry("400x520")
-        top.attributes("-topmost", True)
-        top.configure(fg_color="#050B14")
-        top.grab_set()
+        try:
+            top = ctk.CTkToplevel(self)
+            top.title("Configurar Automação (Ciclos & Clima)")
+            top.geometry("420x560")
+            top.attributes("-topmost", True)
+            top.configure(fg_color="#050B14")
 
-        ctk.CTkLabel(top, text="⚙️ PARÂMETROS DE AUTOMAÇÃO", font=("Segoe UI", 15, "bold"), text_color="#38BDF8").pack(pady=(22, 12))
-        f_form = ctk.CTkFrame(top, fg_color="transparent")
-        f_form.pack(fill="x", padx=26, pady=4)
+            ctk.CTkLabel(top, text="⚙️ PARÂMETROS DE AUTOMAÇÃO", font=("Segoe UI", 16, "bold"), text_color="#38BDF8").pack(pady=(20, 10))
+            
+            f_form = ctk.CTkFrame(top, fg_color="#080E1A", corner_radius=10, border_width=1, border_color="#1E293B")
+            f_form.pack(fill="both", expand=True, padx=20, pady=10)
 
-        cfg = self.horta.config
-        
-        def criar_input(parent, titulo, valor_padrao):
-            linha = ctk.CTkFrame(parent, fg_color="transparent")
-            linha.pack(fill="x", pady=6)
-            ctk.CTkLabel(linha, text=titulo, text_color="#CBD5E1", font=("Segoe UI", 12)).pack(side="left")
-            e = ctk.CTkEntry(linha, width=70, fg_color="#02040A", border_color="#1E293B", font=("Segoe UI", 13, "bold"), justify="center")
-            e.pack(side="right")
-            e.insert(0, str(valor_padrao))
-            return e
+            cfg = self.horta.config
+            
+            def criar_input(parent, titulo, valor_padrao):
+                linha = ctk.CTkFrame(parent, fg_color="transparent")
+                linha.pack(fill="x", padx=16, pady=8)
+                ctk.CTkLabel(linha, text=titulo, text_color="#CBD5E1", font=("Segoe UI", 12, "bold")).pack(side="left")
+                e = ctk.CTkEntry(linha, width=90, height=34, fg_color="#02040A", border_color="#1E293B", font=("Segoe UI", 13, "bold"), justify="center")
+                e.pack(side="right")
+                e.insert(0, str(valor_padrao))
+                return e
 
-        e_foto = criar_input(f_form, "Horas de Luz / Dia (h):", getattr(cfg, 'fotoperiodo_horas', 18.0))
-        e_hora = criar_input(f_form, "Início da Luz (Hora 0-23):", getattr(cfg, 'inicio_luz_hora', 6))
-        e_min = criar_input(f_form, "Início da Luz (Minuto 0-59):", getattr(cfg, 'inicio_luz_minuto', 0))
-        ctk.CTkFrame(f_form, height=1, fg_color="#1E293B").pack(fill="x", pady=10)
-        e_bon = criar_input(f_form, "Bomba Submersa - LIGADA (min):", getattr(cfg, 'bomba_on_min', 15))
-        e_boff = criar_input(f_form, "Bomba Submersa - PAUSA (min):", getattr(cfg, 'bomba_off_min', 45))
-        ctk.CTkFrame(f_form, height=1, fg_color="#1E293B").pack(fill="x", pady=10)
-        e_fex = criar_input(f_form, "Ligar Exaustor se Ar > (°C):", getattr(cfg, 'fan_exaustao_trigger', 28.0))
-        e_fin = criar_input(f_form, "Ligar Insuflador se Ar > (°C):", getattr(cfg, 'fan_insuflacao_trigger', 25.0))
+            e_foto = criar_input(f_form, "Horas de Luz / Dia (h):", getattr(cfg, 'fotoperiodo_horas', 18.0))
+            e_hora = criar_input(f_form, "Início da Luz (Hora 0-23):", getattr(cfg, 'inicio_luz_hora', 6))
+            e_min = criar_input(f_form, "Início da Luz (Minuto 0-59):", getattr(cfg, 'inicio_luz_minuto', 0))
+            
+            ctk.CTkFrame(f_form, height=1, fg_color="#1E293B").pack(fill="x", padx=16, pady=6)
+            
+            e_bon = criar_input(f_form, "Bomba Submersa - ON (min):", getattr(cfg, 'bomba_on_min', 15))
+            e_boff = criar_input(f_form, "Bomba Submersa - PAUSA (min):", getattr(cfg, 'bomba_off_min', 45))
+            
+            ctk.CTkFrame(f_form, height=1, fg_color="#1E293B").pack(fill="x", padx=16, pady=6)
+            
+            e_fex = criar_input(f_form, "Exaustor se Ar > (°C):", getattr(cfg, 'fan_exaustao_trigger', 28.0))
+            e_fin = criar_input(f_form, "Insuflador se Ar > (°C):", getattr(cfg, 'fan_insuflacao_trigger', 25.0))
 
-        def salvar():
-            try:
-                cfg.fotoperiodo_horas = float(e_foto.get())
-                cfg.inicio_luz_hora = int(e_hora.get())
-                cfg.inicio_luz_minuto = int(e_min.get())
-                cfg.bomba_on_min = int(e_bon.get())
-                cfg.bomba_off_min = int(e_boff.get())
-                cfg.fan_exaustao_trigger = float(e_fex.get())
-                cfg.fan_insuflacao_trigger = float(e_fin.get())
-                self.atualizar_resumos_visuais()
-                top.destroy()
-            except ValueError:
-                messagebox.showerror("Erro", "Valores inválidos. Use apenas números (ex: 28.0).")
+            def salvar():
+                try:
+                    foto = float(e_foto.get().replace(",", "."))
+                    hora = int(e_hora.get())
+                    minuto = int(e_min.get())
+                    bon = int(e_bon.get())
+                    boff = int(e_boff.get())
+                    fex = float(e_fex.get().replace(",", "."))
+                    fin = float(e_fin.get().replace(",", "."))
 
-        ctk.CTkButton(top, text="APLICAR", command=salvar, fg_color="#38BDF8", hover_color="#0284C7", text_color="#02040A", height=40, font=("Segoe UI", 13, "bold"), corner_radius=6).pack(fill="x", padx=26, pady=20)
+                    if not (0 <= foto <= 24):
+                        raise ValueError("Fotoperíodo deve estar entre 0 e 24h.")
+                    if not (0 <= hora <= 23 and 0 <= minuto <= 59):
+                        raise ValueError("Horário de início inválido (0-23h / 0-59m).")
+                    if bon < 1 or boff < 0:
+                        raise ValueError("Tempos da bomba inválidos.")
+
+                    cfg.fotoperiodo_horas = foto
+                    cfg.inicio_luz_hora = hora
+                    cfg.inicio_luz_minuto = minuto
+                    cfg.bomba_on_min = bon
+                    cfg.bomba_off_min = boff
+                    cfg.fan_exaustao_trigger = fex
+                    cfg.fan_insuflacao_trigger = fin
+
+                    self.horta.aplicar_parametros_automacao(bon, boff, fex, fin)
+                    self.horta.executar_automacao()
+                    self.atualizar_resumos_visuais()
+                    self.atualizar_interface()
+                    top.destroy()
+                except ValueError as err:
+                    messagebox.showerror("Erro", f"Valores inválidos: {err}")
+
+            ctk.CTkButton(top, text="SALVAR PARÂMETROS", command=salvar, fg_color="#38BDF8", hover_color="#0284C7", text_color="#02040A", height=42, font=("Segoe UI", 13, "bold"), corner_radius=6).pack(fill="x", padx=20, pady=(10, 20))
+            
+            top.grab_set()
+        except Exception as e:
+            self.atualizar_log_serial(f"[ERRO MODAL] Falha ao abrir modal automação: {e}\n")
 
     def abrir_modal_metas(self):
-        top = ctk.CTkToplevel(self)
-        top.title("Ajustar Limites Biológicos")
-        top.geometry("400x480")
-        top.attributes("-topmost", True)
-        top.configure(fg_color="#050B14")
-        top.grab_set()
+        try:
+            top = ctk.CTkToplevel(self)
+            top.title("Ajustar Limites Biológicos")
+            top.geometry("420x520")
+            top.attributes("-topmost", True)
+            top.configure(fg_color="#050B14")
 
-        ctk.CTkLabel(top, text="⚙️ LIMITES BIOLÓGICOS", font=("Segoe UI", 15, "bold"), text_color="#10B981").pack(pady=(22, 12))
-        f_form = ctk.CTkFrame(top, fg_color="transparent")
-        f_form.pack(fill="x", padx=26, pady=4)
-
-        cfg = self.horta.config
-        
-        def criar_input_duplo(parent, titulo, v_min, v_max):
-            linha = ctk.CTkFrame(parent, fg_color="transparent")
-            linha.pack(fill="x", pady=6)
-            ctk.CTkLabel(linha, text=titulo, text_color="#CBD5E1", font=("Segoe UI", 12)).pack(side="left")
+            ctk.CTkLabel(top, text="⚙️ LIMITES BIOLÓGICOS", font=("Segoe UI", 16, "bold"), text_color="#10B981").pack(pady=(20, 10))
             
-            f_vals = ctk.CTkFrame(linha, fg_color="transparent")
-            f_vals.pack(side="right")
-            e1 = ctk.CTkEntry(f_vals, width=50, fg_color="#02040A", border_color="#1E293B", justify="center", font=("Segoe UI", 12, "bold"))
-            e1.pack(side="left")
-            e1.insert(0, str(v_min))
-            ctk.CTkLabel(f_vals, text="-", text_color="#94A3B8").pack(side="left", padx=4)
-            e2 = ctk.CTkEntry(f_vals, width=50, fg_color="#02040A", border_color="#1E293B", justify="center", font=("Segoe UI", 12, "bold"))
-            e2.pack(side="left")
-            e2.insert(0, str(v_max))
-            return e1, e2
+            f_form = ctk.CTkFrame(top, fg_color="#080E1A", corner_radius=10, border_width=1, border_color="#1E293B")
+            f_form.pack(fill="both", expand=True, padx=20, pady=10)
 
-        e_ph_min, e_ph_max = criar_input_duplo(f_form, "pH:", getattr(cfg, 'ph_min', 5.5), getattr(cfg, 'ph_max', 6.5))
-        e_ec_min, e_ec_max = criar_input_duplo(f_form, "EC (mS/cm):", getattr(cfg, 'ec_min', 1.0), getattr(cfg, 'ec_max', 1.8))
-        e_tar_min, e_tar_max = criar_input_duplo(f_form, "Temp. Ar (°C):", getattr(cfg, 'temperatura_ar_min', 18.0), getattr(cfg, 'temperatura_ar_max', 26.0))
-        e_tag_min, e_tag_max = criar_input_duplo(f_form, "Temp. Água (°C):", getattr(cfg, 'temperatura_agua_min', 18.0), getattr(cfg, 'temperatura_agua_max', 26.0))
-        e_umi_min, e_umi_max = criar_input_duplo(f_form, "Umidade (%):", getattr(cfg, 'umidade_ar_min', 50.0), getattr(cfg, 'umidade_ar_max', 80.0))
+            cfg = self.horta.config
+            
+            def criar_input_duplo(parent, titulo, v_min, v_max):
+                linha = ctk.CTkFrame(parent, fg_color="transparent")
+                linha.pack(fill="x", padx=16, pady=8)
+                ctk.CTkLabel(linha, text=titulo, text_color="#CBD5E1", font=("Segoe UI", 12, "bold")).pack(side="left")
+                
+                f_vals = ctk.CTkFrame(linha, fg_color="transparent")
+                f_vals.pack(side="right")
+                e1 = ctk.CTkEntry(f_vals, width=65, height=34, fg_color="#02040A", border_color="#1E293B", justify="center", font=("Segoe UI", 12, "bold"))
+                e1.pack(side="left")
+                e1.insert(0, str(v_min))
+                ctk.CTkLabel(f_vals, text="até", text_color="#94A3B8", font=("Segoe UI", 11)).pack(side="left", padx=6)
+                e2 = ctk.CTkEntry(f_vals, width=65, height=34, fg_color="#02040A", border_color="#1E293B", justify="center", font=("Segoe UI", 12, "bold"))
+                e2.pack(side="left")
+                e2.insert(0, str(v_max))
+                return e1, e2
 
-        def salvar():
-            try:
-                cfg.ph_min = float(e_ph_min.get()); cfg.ph_max = float(e_ph_max.get())
-                cfg.ec_min = float(e_ec_min.get()); cfg.ec_max = float(e_ec_max.get())
-                cfg.temperatura_ar_min = float(e_tar_min.get()); cfg.temperatura_ar_max = float(e_tar_max.get())
-                cfg.temperatura_agua_min = float(e_tag_min.get()); cfg.temperatura_agua_max = float(e_tag_max.get())
-                cfg.umidade_ar_min = float(e_umi_min.get()); cfg.umidade_ar_max = float(e_umi_max.get())
-                self.atualizar_resumos_visuais()
-                top.destroy()
-            except ValueError:
-                messagebox.showerror("Erro", "Valores inválidos.")
+            e_ph_min, e_ph_max = criar_input_duplo(f_form, "pH:", getattr(cfg, 'ph_min', 5.5), getattr(cfg, 'ph_max', 6.5))
+            e_ec_min, e_ec_max = criar_input_duplo(f_form, "EC (mS/cm):", getattr(cfg, 'ec_min', 1.0), getattr(cfg, 'ec_max', 1.8))
+            e_tar_min, e_tar_max = criar_input_duplo(f_form, "Temp. Ar (°C):", getattr(cfg, 'temperatura_ar_min', 18.0), getattr(cfg, 'temperatura_ar_max', 26.0))
+            e_tag_min, e_tag_max = criar_input_duplo(f_form, "Temp. Água (°C):", getattr(cfg, 'temperatura_agua_min', 18.0), getattr(cfg, 'temperatura_agua_max', 26.0))
+            e_umi_min, e_umi_max = criar_input_duplo(f_form, "Umidade (%):", getattr(cfg, 'umidade_ar_min', 50.0), getattr(cfg, 'umidade_ar_max', 80.0))
 
-        ctk.CTkButton(top, text="APLICAR", command=salvar, fg_color="#10B981", hover_color="#059669", text_color="#FFFFFF", height=40, font=("Segoe UI", 13, "bold"), corner_radius=6).pack(fill="x", padx=26, pady=20)
+            def salvar():
+                try:
+                    ph_min = float(e_ph_min.get().replace(",", "."))
+                    ph_max = float(e_ph_max.get().replace(",", "."))
+                    ec_min = float(e_ec_min.get().replace(",", "."))
+                    ec_max = float(e_ec_max.get().replace(",", "."))
+                    tar_min = float(e_tar_min.get().replace(",", "."))
+                    tar_max = float(e_tar_max.get().replace(",", "."))
+                    tag_min = float(e_tag_min.get().replace(",", "."))
+                    tag_max = float(e_tag_max.get().replace(",", "."))
+                    umi_min = float(e_umi_min.get().replace(",", "."))
+                    umi_max = float(e_umi_max.get().replace(",", "."))
+
+                    if ph_min > ph_max or ec_min > ec_max or tar_min > tar_max or tag_min > tag_max or umi_min > umi_max:
+                        raise ValueError("O valor mínimo não pode ser maior que o máximo.")
+
+                    cfg.ph_min = ph_min; cfg.ph_max = ph_max
+                    cfg.ec_min = ec_min; cfg.ec_max = ec_max
+                    cfg.temperatura_ar_min = tar_min; cfg.temperatura_ar_max = tar_max
+                    cfg.temperatura_agua_min = tag_min; cfg.temperatura_agua_max = tag_max
+                    cfg.umidade_ar_min = umi_min; cfg.umidade_ar_max = umi_max
+                    self.horta.diagnosticar()
+                    self.atualizar_resumos_visuais()
+                    self.atualizar_interface()
+                    top.destroy()
+                except ValueError as err:
+                    messagebox.showerror("Erro", f"Valores inválidos: {err}")
+
+            ctk.CTkButton(top, text="SALVAR LIMITES", command=salvar, fg_color="#10B981", hover_color="#059669", text_color="#FFFFFF", height=42, font=("Segoe UI", 13, "bold"), corner_radius=6).pack(fill="x", padx=20, pady=(10, 20))
+            
+            top.grab_set()
+        except Exception as e:
+            self.atualizar_log_serial(f"[ERRO MODAL] Falha ao abrir modal metas: {e}\n")
 
     def atualizar_resumos_visuais(self):
         cfg = self.horta.config
@@ -713,15 +912,47 @@ class JanelaPrincipal(ctk.CTk):
         except Exception:
             self.label_guia_nutricional.configure(text="Vol: 10.0L | Sistema Nutricional Ativo")
 
+    def aplicar_correcao_nutricional_simulador(self):
+        if self.modo_hardware_real:
+            messagebox.showinfo("Modo ESP32 Ativo", "No modo ESP32 real, faça a dosagem física no reservatório seguindo as quantidades do Guia Nutricional.")
+            return
+        guia = self.horta.calcular_receita_dosagem()
+        acoes = []
+        if guia.get("quantidade_total_g", 0.0) > 0:
+            self.horta.aplicar_dosagem("FERTILIZANTE", guia["quantidade_total_g"])
+            acoes.append(f"+{guia['quantidade_total_g']:.1f}g Fert A+B")
+        if guia.get("ph_down_ml", 0.0) > 0:
+            self.horta.aplicar_dosagem("PH_DOWN", guia["ph_down_ml"])
+            acoes.append(f"+{guia['ph_down_ml']:.1f}ml pH Down")
+        elif guia.get("ph_up_ml", 0.0) > 0:
+            self.horta.aplicar_dosagem("PH_UP", guia["ph_up_ml"])
+            acoes.append(f"+{guia['ph_up_ml']:.1f}ml pH Up")
+
+        if acoes:
+            self.sincronizar_sliders_com_dados({"ph": self.horta.ph, "ec": self.horta.ec})
+            self.atualizar_interface()
+            self.atualizar_log_serial(f"[DOSAGEM SIMULADOR] Aplicado: {', '.join(acoes)} -> pH={self.horta.ph:.2f}, EC={self.horta.ec:.2f}\n")
+        else:
+            self.atualizar_log_serial("[DOSAGEM] Solução nutritiva já está dentro da faixa ideal.\n")
+
     def preencher_configuracao(self):
         try:
             config = self.horta.config
             self.entry_nome_cultivo.delete(0, "end")
             self.entry_nome_cultivo.insert(0, getattr(config, 'nome_cultivo', 'Alface Experimental #01'))
+
+            cultura_atual = getattr(config, 'nome', 'ALFACE')
+            if cultura_atual in self.listar_todas_culturas():
+                self.combo_cultura.set(cultura_atual)
             
             fase = getattr(config, 'fase', 'VEGETATIVO')
-            mapa_reverso = {"MUDAS": "MUDAS", "VEGETATIVO": "VEGA", "FLORACAO": "FLORA", "FLORACAO_FRUTIFICACAO": "FLORA"}
-            if fase in mapa_reverso: self.segmented_fase.set(mapa_reverso[fase])
+            mapa_reverso = {
+                "MUDA": "MUDAS", "MUDAS": "MUDAS",
+                "VEGETATIVO": "VEGA", "VEGA": "VEGA",
+                "FLORACAO": "FLORA", "FLORA": "FLORA", "FLORACAO_FRUTIFICACAO": "FLORA"
+            }
+            if fase in mapa_reverso:
+                self.segmented_fase.set(mapa_reverso[fase])
 
             self.entry_nome_fertilizante.delete(0, "end")
             self.entry_nome_fertilizante.insert(0, getattr(self.horta, 'nome_fertilizante', 'Flex Azul + Vermelho'))
@@ -729,19 +960,26 @@ class JanelaPrincipal(ctk.CTk):
             self.entry_taxa_ab.insert(0, str(getattr(self.horta, 'gramas_por_litro_recomendado', 0.84)))
             
             self.atualizar_resumos_visuais()
-        except Exception as e: pass
+        except Exception:
+            pass
 
     def coletar_dados_formulario(self):
         cfg = self.horta.config
-        cfg.nome_cultivo = self.entry_nome_cultivo.get()
+        cfg.nome_cultivo = self.entry_nome_cultivo.get().strip() or "Cultivo #01"
+        cultura_sel = self.combo_cultura.get().strip().upper()
+        if cultura_sel:
+            cfg.nome = cultura_sel
+            self.horta.cultivo = cultura_sel
         
         val_atual = self.segmented_fase.get()
-        mapa_fases = {"MUDAS": "MUDAS", "VEGA": "VEGETATIVO", "FLORA": "FLORACAO"}
-        cfg.fase = mapa_fases.get(val_atual, "VEGETATIVO")
+        mapa_fases = {"MUDAS": "MUDA", "VEGA": "VEGETATIVO", "FLORA": "FLORACAO"}
+        cfg.definir_fase(mapa_fases.get(val_atual, "VEGETATIVO"))
 
         self.horta.nome_fertilizante = self.entry_nome_fertilizante.get()
-        try: self.horta.gramas_por_litro_recomendado = float(self.entry_taxa_ab.get())
-        except: pass
+        try:
+            self.horta.gramas_por_litro_recomendado = float(self.entry_taxa_ab.get().replace(",", "."))
+        except Exception:
+            pass
         return cfg
 
     def acao_novo_cultivo_limpo(self):
@@ -794,8 +1032,10 @@ class JanelaPrincipal(ctk.CTk):
 
         def salvar():
             nome = entry_cult.get().strip().upper()
-            try: foto = float(entry_foto.get().replace(",", "."))
-            except ValueError: foto = 16.0
+            try:
+                foto = float(entry_foto.get().replace(",", "."))
+            except ValueError:
+                foto = 16.0
             if nome:
                 self.culturas_customizadas_cache[nome] = {
                     "ph_min": 5.8, "ph_max": 6.3, "ec_min": 1.2, "ec_max": 2.0,
@@ -815,8 +1055,14 @@ class JanelaPrincipal(ctk.CTk):
         if nome_cultivo in self.cultivos_salvos_cache:
             dados = self.cultivos_salvos_cache[nome_cultivo]
             cfg = self.horta.config
+            cultura_salva = str(dados.get("cultura", "ALFACE")).strip().upper()
+            cfg.nome = cultura_salva
+            self.horta.cultivo = cultura_salva
             cfg.nome_cultivo = nome_cultivo
-            cfg.fase = dados.get("fase", "VEGETATIVO")
+            try:
+                cfg.definir_fase(dados.get("fase", "VEGETATIVO"))
+            except Exception:
+                cfg.definir_fase("VEGETATIVO")
             
             cfg.fotoperiodo_horas = dados.get("fotoperiodo", 18.0)
             cfg.inicio_luz_hora = dados.get("hora", 6)
@@ -825,6 +1071,9 @@ class JanelaPrincipal(ctk.CTk):
             cfg.bomba_off_min = dados.get("bomba_off", 45)
             cfg.fan_exaustao_trigger = dados.get("fan_ex", 28.0)
             cfg.fan_insuflacao_trigger = dados.get("fan_in", 25.0)
+            self.horta.aplicar_parametros_automacao(
+                cfg.bomba_on_min, cfg.bomba_off_min, cfg.fan_exaustao_trigger, cfg.fan_insuflacao_trigger
+            )
 
             cfg.ph_min = dados.get("ph_min", 5.5); cfg.ph_max = dados.get("ph_max", 6.5)
             cfg.ec_min = dados.get("ec_min", 1.0); cfg.ec_max = dados.get("ec_max", 1.8)
@@ -836,12 +1085,16 @@ class JanelaPrincipal(ctk.CTk):
             self.horta.gramas_por_litro_recomendado = dados.get("taxa_ab", 0.84)
 
             self.preencher_configuracao()
+            self.horta.executar_automacao()
             self.atualizar_interface()
             self.atualizar_log_serial(f"[INFO] Cultivo '{nome_cultivo}' carregado com sucesso!\n")
 
     def carregar_cultura(self, nome):
         try:
             cfg = self.horta.config
+            nome_norm = str(nome).strip().upper()
+            cfg.nome = nome_norm
+            self.horta.cultivo = nome_norm
             if nome in self.culturas_customizadas_cache:
                 d = self.culturas_customizadas_cache[nome]
                 cfg.ph_min = d.get("ph_min", 5.5); cfg.ph_max = d.get("ph_max", 6.5)
@@ -861,9 +1114,10 @@ class JanelaPrincipal(ctk.CTk):
             
             self.preencher_configuracao()
             self.horta.diagnosticar()
+            self.horta.executar_automacao()
             self.atualizar_interface()
             self.atualizar_log_serial(f"[INFO] Espécie carregada: {nome} (Metas aplicadas)\n")
-        except Exception as e: 
+        except Exception as e:
             self.atualizar_log_serial(f"[ERRO] Falha ao carregar espécie: {e}\n")
 
     def salvar_receita_local(self):
@@ -889,7 +1143,8 @@ class JanelaPrincipal(ctk.CTk):
             self.horta.diagnosticar()
             self.atualizar_interface()
             self.atualizar_log_serial(f"[SUCESSO] Cultivo '{nome_cultivo}' salvo e aplicado localmente!\n")
-        except Exception as e: self.atualizar_log_serial(f"[ERRO] Falha ao salvar cultivo: {e}\n")
+        except Exception as e:
+            self.atualizar_log_serial(f"[ERRO] Falha ao salvar cultivo: {e}\n")
 
     def sincronizar_receita_esp32(self):
         if not self.modo_hardware_real or not self.ser or not self.ser.is_open:
@@ -910,14 +1165,30 @@ class JanelaPrincipal(ctk.CTk):
         try:
             cfg = self.coletar_dados_formulario()
             pacote_json = {
-                "cmd": "set_config", "cultura": getattr(cfg, 'nome_cultivo', ''), "fase": getattr(cfg, 'fase', ''),
-                "ph_min": getattr(cfg, 'ph_min', 0), "ph_max": getattr(cfg, 'ph_max', 0), "ec_min": getattr(cfg, 'ec_min', 0), "ec_max": getattr(cfg, 'ec_max', 0), 
-                "temp_ar_max": getattr(cfg, 'temperatura_ar_max', 0), "fotoperiodo": getattr(cfg, 'fotoperiodo_horas', 0), "inicio_luz": getattr(cfg, 'inicio_luz_hora', 0),
-                "fertilizante": self.horta.nome_fertilizante, "taxa_ab": self.horta.gramas_por_litro_recomendado
+                "cmd": "set_config",
+                "cultura": self.combo_cultura.get() or getattr(cfg, 'nome', 'ALFACE'),
+                "fase": getattr(cfg, 'fase', 'VEGETATIVO'),
+                "ph_min": getattr(cfg, 'ph_min', 5.5),
+                "ph_max": getattr(cfg, 'ph_max', 6.5),
+                "ec_min": getattr(cfg, 'ec_min', 1.0),
+                "ec_max": getattr(cfg, 'ec_max', 1.8),
+                "temp_ar_min": getattr(cfg, 'temperatura_ar_min', 18.0),
+                "temp_ar_max": getattr(cfg, 'temperatura_ar_max', 26.0),
+                "temp_agua_min": getattr(cfg, 'temperatura_agua_min', 18.0),
+                "temp_agua_max": getattr(cfg, 'temperatura_agua_max', 26.0),
+                "umidade_min": getattr(cfg, 'umidade_ar_min', 50.0),
+                "umidade_max": getattr(cfg, 'umidade_ar_max', 80.0),
+                "fotoperiodo": getattr(cfg, 'fotoperiodo_horas', 16.0),
+                "inicio_luz": getattr(cfg, 'inicio_luz_hora', 6),
+                "inicio_minuto": getattr(cfg, 'inicio_luz_minuto', 0),
+                "bomba_on": getattr(cfg, 'bomba_on_min', 15),
+                "bomba_off": getattr(cfg, 'bomba_off_min', 45),
+                "fertilizante": self.horta.nome_fertilizante,
+                "taxa_ab": self.horta.gramas_por_litro_recomendado
             }
             self.enviar_pacote_serial_raw(pacote_json)
             self.atualizar_log_serial("[SUCESSO] Parâmetros sincronizados com o ESP32 via Serial!\n")
-        except Exception as e: 
+        except Exception as e:
             self.atualizar_log_serial(f"[ERRO] Falha ao sincronizar com ESP32: {e}\n")
 
     def enviar_pacote_serial_raw(self, dados_dict):
@@ -925,7 +1196,8 @@ class JanelaPrincipal(ctk.CTk):
             try:
                 linha = json.dumps(dados_dict) + "\n"
                 self.ser.write(linha.encode('utf-8'))
-            except Exception as e: self.atualizar_log_serial(f"[ERRO] Falha ao enviar serial: {e}\n")
+            except Exception as e:
+                self.atualizar_log_serial(f"[ERRO] Falha ao enviar serial: {e}\n")
         else:
             self.atualizar_log_serial("[AVISO SERIAL] ESP32 não conectado. Comando simulado.\n")
 
@@ -981,7 +1253,43 @@ class JanelaPrincipal(ctk.CTk):
         self.switch_hardware_cfg = ctk.CTkSwitch(c_hw, text=" Ativar Comunicação com ESP32 (USB)", command=lambda: self.sincronizar_chaves("config"), font=("Segoe UI", 13, "bold"), text_color="#F8FAFC", progress_color="#38BDF8")
         self.switch_hardware_cfg.pack(anchor="w", padx=20, pady=12)
         self.switch_hardware_cfg.deselect()
-        ctk.CTkLabel(c_hw, text="Quando ativado, busca porta serial real do ESP32 (Azul). Quando desativado, o simulador assume o gêmeo digital (Laranja).", font=("Segoe UI", 12), text_color="#94A3B8", wraplength=460, justify="left").pack(anchor="w", padx=20, pady=12)
+
+        # Seletor de Porta COM (Automático ou Manual)
+        f_porta = ctk.CTkFrame(c_hw, fg_color="#02040A", corner_radius=10, border_width=1, border_color="#1E293B")
+        f_porta.pack(fill="x", padx=20, pady=10)
+        ctk.CTkLabel(f_porta, text="Porta Serial USB (ESP32):", font=("Segoe UI", 12, "bold"), text_color="#CBD5E1").pack(anchor="w", padx=14, pady=(12, 4))
+        f_porta_row = ctk.CTkFrame(f_porta, fg_color="transparent")
+        f_porta_row.pack(fill="x", padx=14, pady=(0, 12))
+        self.combo_porta_com = ctk.CTkComboBox(
+            f_porta_row, values=self.listar_portas_seriais(),
+            fg_color="#050B14", border_color="#1E293B", button_color="#1E293B",
+            height=36, font=("Segoe UI", 12, "bold")
+        )
+        self.combo_porta_com.pack(side="left", fill="x", expand=True, padx=(0, 8))
+        self.combo_porta_com.set("AUTO (Detectar ESP32)")
+        ctk.CTkButton(
+            f_porta_row, text="🔄 Atualizar", width=100, height=36,
+            command=self.atualizar_lista_portas,
+            fg_color="#1E293B", hover_color="#334155", text_color="#38BDF8",
+            font=("Segoe UI", 12, "bold"), corner_radius=6
+        ).pack(side="right")
+
+        f_acoes_esp = ctk.CTkFrame(c_hw, fg_color="transparent")
+        f_acoes_esp.pack(fill="x", padx=20, pady=8)
+        ctk.CTkButton(
+            f_acoes_esp, text="🕒 Sincronizar Relógio RTC", height=38,
+            command=self.sincronizar_relogio_esp32,
+            fg_color="#0F172A", hover_color="#1E293B", text_color="#F8FAFC",
+            font=("Segoe UI", 12, "bold"), corner_radius=6
+        ).pack(side="left", expand=True, fill="x", padx=(0, 6))
+        ctk.CTkButton(
+            f_acoes_esp, text="📡 Solicitar Telemetria Agora", height=38,
+            command=lambda: self.enviar_pacote_serial_raw({"cmd": "sync_request"}),
+            fg_color="#0F172A", hover_color="#1E293B", text_color="#38BDF8",
+            font=("Segoe UI", 12, "bold"), corner_radius=6
+        ).pack(side="left", expand=True, fill="x", padx=(6, 0))
+
+        ctk.CTkLabel(c_hw, text="Dica: Em 'AUTO', o sistema detecta automaticamente portas USB/UART (CH340, CP210x, FTDI). Caso o Windows use outro driver, clique em 'Atualizar' e selecione a porta COM manualmente. Lembre-se de fechar o Monitor Serial da Arduino IDE antes de conectar.", font=("Segoe UI", 12), text_color="#94A3B8", wraplength=460, justify="left").pack(anchor="w", padx=20, pady=12)
 
         c_ser = ctk.CTkFrame(frame, fg_color="#050B14", corner_radius=14, border_width=1, border_color="#1E293B")
         c_ser.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
@@ -1031,19 +1339,168 @@ class JanelaPrincipal(ctk.CTk):
 
         if self.modo_hardware_real:
             if self.demonstracao_ativa: self.alternar_demonstracao()
-            self.label_status_esp.configure(text="● BUSCANDO ESP32...", text_color="#38BDF8")
-            self.atualizar_log_serial("[INFO] Modo ESP32 ativado. Buscando dispositivo USB conectado...\n")
+            self.label_status_esp.configure(text="● BUSCANDO ESP32 REAL...", text_color="#38BDF8")
+            self.atualizar_log_serial("[INFO] Modo ESP32 ativado. Buscando dispositivo USB real conectado...\n")
             self.tentar_conectar_esp_real()
         else:
             self.fechar_conexao_serial()
             self.label_status_esp.configure(text="● SIMULADOR MANUAL", text_color="#F59E0B")
             self.btn_pausa_tempo.configure(fg_color="#F59E0B", hover_color="#D97706")
             if self.ultimo_valor_esp:
-                for k, v in [("temperatura_ar", self.horta.alterar_temperatura_ar), ("umidade_ar", self.horta.alterar_umidade_ar), ("temperatura_agua", self.horta.alterar_temperatura_agua), ("ph", self.horta.alterar_ph), ("ec", self.horta.alterar_ec), ("nivel_agua", self.horta.alterar_nivel_agua)]:
-                    if k in self.ultimo_valor_esp:
-                        v(self.ultimo_valor_esp[k])
-                        if k in self.sliders: self.sliders[k].set(self.ultimo_valor_esp[k])
+                self.sincronizar_sliders_com_dados(self.ultimo_valor_esp)
             self.atualizar_log_serial("[INFO] Modo Gêmeo Digital / Simulador ativado.\n")
+
+    def sincronizar_sliders_com_dados(self, dados_dict):
+        mapa_sliders = [
+            ("temperatura_ar", "Temperatura do ar", "°C", self.horta.alterar_temperatura_ar),
+            ("umidade_ar", "Umidade do ar", "%", self.horta.alterar_umidade_ar),
+            ("temperatura_agua", "Temperatura da água", "°C", self.horta.alterar_temperatura_agua),
+            ("ph", "pH", "", self.horta.alterar_ph),
+            ("ec", "EC", "mS/cm", self.horta.alterar_ec),
+            ("nivel_agua", "Nível da água", "%", self.horta.alterar_nivel_agua),
+        ]
+        for chave_json, nome_slider, unidade, setter in mapa_sliders:
+            if chave_json in dados_dict:
+                try:
+                    val = float(dados_dict[chave_json])
+                    setter(val)
+                    if nome_slider in self.sliders:
+                        self.sliders[nome_slider].set(val)
+                    if nome_slider in self.labels_valores:
+                        self.labels_valores[nome_slider].configure(text=f"{val:.1f} {unidade}")
+                except Exception:
+                    pass
+
+    def processar_telemetria_esp32(self, dados_esp):
+        """Aplica no Gêmeo Digital todos os dados e comandos vindos do ESP32 (espelhamento total)."""
+        self.ultimo_valor_esp = dados_esp
+        self.sincronizar_sliders_com_dados(dados_esp)
+
+        # 1. Espelha modos e estados dos atuadores (se alterados na tela TFT do ESP32)
+        mapa_inv = {0: "AUTO", 1: "ON", 2: "OFF"}
+        if "modo_luz" in dados_esp:
+            self.horta.modo_luz = int(dados_esp["modo_luz"])
+            if hasattr(self, "seg_modo_luz"):
+                self.seg_modo_luz.set(mapa_inv.get(self.horta.modo_luz, "AUTO"))
+        if "modo_exaustor" in dados_esp:
+            self.horta.modo_exaustor = int(dados_esp["modo_exaustor"])
+            if hasattr(self, "seg_modo_exaustor"):
+                self.seg_modo_exaustor.set(mapa_inv.get(self.horta.modo_exaustor, "AUTO"))
+        if "modo_bomba_agua" in dados_esp:
+            self.horta.modo_bomba_agua = int(dados_esp["modo_bomba_agua"])
+            if hasattr(self, "seg_modo_bomba"):
+                self.seg_modo_bomba.set(mapa_inv.get(self.horta.modo_bomba_agua, "AUTO"))
+
+        if "luz" in dados_esp:
+            self.horta.iluminacao = bool(dados_esp["luz"])
+        if "exaustor" in dados_esp:
+            self.horta.ventilacao_exaustor = bool(dados_esp["exaustor"])
+        if "bomba_agua" in dados_esp:
+            self.horta.bomba = bool(dados_esp["bomba_agua"])
+        if "bomba_ar" in dados_esp:
+            self.horta.bomba_ar = bool(dados_esp["bomba_ar"])
+
+        # 2. Espelha calibração de pH e EC (se ajustada na tela TFT do ESP32)
+        if "offset_ph" in dados_esp:
+            novo_off = float(dados_esp["offset_ph"])
+            if abs(novo_off - self.horta.offset_ph) > 0.001:
+                self.horta.offset_ph = novo_off
+                try:
+                    if self.focus_get() != self.entry_offset_ph._entry:
+                        self.entry_offset_ph.delete(0, "end")
+                        self.entry_offset_ph.insert(0, f"{novo_off:.1f}")
+                except Exception:
+                    pass
+        if "fator_ec" in dados_esp:
+            novo_fat = float(dados_esp["fator_ec"])
+            if abs(novo_fat - self.horta.fator_ec) > 0.001:
+                self.horta.fator_ec = novo_fat
+                try:
+                    if self.focus_get() != self.entry_fator_ec._entry:
+                        self.entry_fator_ec.delete(0, "end")
+                        self.entry_fator_ec.insert(0, f"{novo_fat:.2f}")
+                except Exception:
+                    pass
+
+        # 3. Espelha cultura, fase e metas biológicas (se alteradas no TFT do ESP32)
+        cfg = self.horta.config
+        mudou_receita = False
+        if "cultura" in dados_esp:
+            cult_esp = str(dados_esp["cultura"]).strip().upper()
+            if cult_esp == "MANJERICAO":
+                cult_esp = "MANJERICÃO"
+            if cult_esp and cult_esp != getattr(cfg, "nome", "").upper():
+                cfg.nome = cult_esp
+                cfg.nome_cultivo = f"{cult_esp.title()} (ESP32)"
+                try:
+                    self.combo_cultura.set(cult_esp)
+                except Exception:
+                    pass
+                mudou_receita = True
+
+        if "fase" in dados_esp:
+            fase_esp = str(dados_esp["fase"]).strip().upper()
+            if fase_esp and fase_esp != getattr(cfg, "fase", ""):
+                try:
+                    cfg.definir_fase(fase_esp)
+                    mudou_receita = True
+                except Exception:
+                    pass
+
+        for k_json, attr_cfg in [
+            ("ph_min", "ph_min"), ("ph_max", "ph_max"),
+            ("ec_min", "ec_min"), ("ec_max", "ec_max"),
+            ("temp_ar_min", "temperatura_ar_min"), ("temp_ar_max", "temperatura_ar_max"),
+            ("temp_agua_min", "temperatura_agua_min"), ("temp_agua_max", "temperatura_agua_max"),
+            ("umidade_min", "umidade_ar_min"), ("umidade_max", "umidade_ar_max"),
+            ("fotoperiodo", "fotoperiodo_horas"), ("inicio_luz", "inicio_luz_hora"),
+            ("bomba_on", "bomba_on_min"), ("bomba_off", "bomba_off_min")
+        ]:
+            if k_json in dados_esp:
+                try:
+                    val_novo = float(dados_esp[k_json])
+                    if k_json in ("inicio_luz", "bomba_on", "bomba_off"):
+                        val_novo = int(val_novo)
+                    if abs(float(getattr(cfg, attr_cfg, 0)) - float(val_novo)) > 0.01:
+                        setattr(cfg, attr_cfg, val_novo)
+                        mudou_receita = True
+                except Exception:
+                    pass
+
+        if mudou_receita:
+            self.preencher_configuracao()
+
+        self.atualizar_interface()
+
+    def listar_portas_seriais(self):
+        opcoes = ["AUTO (Detectar ESP32)"]
+        if SERIAL_DISPONIVEL:
+            try:
+                for p in serial.tools.list_ports.comports():
+                    opcoes.append(f"{p.device} - {p.description}")
+            except Exception:
+                pass
+        return opcoes
+
+    def atualizar_lista_portas(self):
+        portas = self.listar_portas_seriais()
+        if hasattr(self, "combo_porta_com"):
+            self.combo_porta_com.configure(values=portas)
+            self.combo_porta_com.set(portas[0])
+        self.atualizar_log_serial(f"[SERIAL] Portas detectadas: {', '.join(portas)}\n")
+
+    def sincronizar_relogio_esp32(self):
+        if not self.modo_hardware_real or not self.ser or not self.ser.is_open:
+            self.atualizar_log_serial("[AVISO] Conecte o ESP32 antes de sincronizar o relógio RTC.\n")
+            return
+        agora_pc = datetime.now()
+        self.enviar_pacote_serial_raw({
+            "cmd": "set_clock",
+            "hora": agora_pc.hour,
+            "minuto": agora_pc.minute,
+            "segundo": agora_pc.second
+        })
+        self.atualizar_log_serial(f"[RTC -> ESP32] Horário sincronizado: {agora_pc.strftime('%H:%M:%S')}\n")
 
     def tentar_conectar_esp_real(self):
         if not SERIAL_DISPONIVEL:
@@ -1051,45 +1508,61 @@ class JanelaPrincipal(ctk.CTk):
             self.atualizar_log_serial("[ERRO] Biblioteca 'pyserial' não encontrada.\n")
             return
 
-        def scan_e_conectar():
-            portas = list(serial.tools.list_ports.comports())
-            porta_encontrada = None
-            
-            for p in portas:
-                desc = (p.description or "").upper()
-                hwid = (p.hwid or "").upper()
-                if any(x in desc or x in hwid for x in ["USB", "UART", "CH340", "CP210", "ESP32", "ARDUINO"]):
-                    porta_encontrada = p.device
-                    break
-            
-            if not porta_encontrada and len(portas) > 0: porta_encontrada = portas[0].device
+        selecao_porta = self.combo_porta_com.get() if hasattr(self, "combo_porta_com") else "AUTO (Detectar ESP32)"
 
+        def scan_e_conectar():
+            porta_encontrada = None
+
+            if selecao_porta and not selecao_porta.startswith("AUTO"):
+                porta_encontrada = selecao_porta.split(" - ")[0].strip()
+            else:
+                portas = list(serial.tools.list_ports.comports())
+                for p in portas:
+                    desc = (p.description or "").upper()
+                    hwid = (p.hwid or "").upper()
+                    dev = (p.device or "").upper()
+                    
+                    if "COM1" in dev and not any(x in desc or x in hwid for x in ["USB", "UART", "CH340", "CP210", "ESP32", "ARDUINO", "FTDI", "SILABS"]):
+                        continue
+                    
+                    if any(x in desc or x in hwid for x in ["USB", "UART", "CH340", "CP210", "ESP32", "ARDUINO", "FTDI", "SILABS"]):
+                        porta_encontrada = p.device
+                        break
+            
             if porta_encontrada and self.modo_hardware_real:
                 try:
                     self.ser = serial.Serial(porta_encontrada, 115200, timeout=1)
                     self.serial_thread_ativa = True
-                    self.label_status_esp.configure(text=f"● ESP32 CONECTADO ({porta_encontrada})", text_color="#38BDF8")
-                    self.atualizar_log_serial(f"[SUCESSO] Link estabelecido com ESP32 na porta física {porta_encontrada}\n")
+                    self.after(0, lambda p=porta_encontrada: self.label_status_esp.configure(text=f"● ESP32 REAL CONECTADO ({p})", text_color="#38BDF8"))
+                    self.after(0, lambda p=porta_encontrada: self.atualizar_log_serial(f"[SUCESSO] Link estabelecido com ESP32 real na porta física {p}\n"))
+                    # Solicita estado inicial completo e sincroniza o relógio RTC com o horário do PC
+                    agora_pc = datetime.now()
+                    self.enviar_pacote_serial_raw({
+                        "cmd": "set_clock",
+                        "hora": agora_pc.hour,
+                        "minuto": agora_pc.minute,
+                        "segundo": agora_pc.second
+                    })
+                    self.enviar_pacote_serial_raw({"cmd": "sync_request"})
                     
                     while self.serial_thread_ativa and self.ser and self.ser.is_open and self.modo_hardware_real:
                         linha = self.ser.readline().decode('utf-8', errors='ignore').strip()
                         if linha:
-                            self.atualizar_log_serial(f"[ESP32] {linha}\n")
+                            self.after(0, lambda l=linha: self.atualizar_log_serial(f"[ESP32] {l}\n"))
                             if linha.startswith("{") and linha.endswith("}"):
                                 try:
                                     dados_esp = json.loads(linha)
-                                    self.ultimo_valor_esp = dados_esp
-                                    for k, v in [("temperatura_ar", self.horta.alterar_temperatura_ar), ("umidade_ar", self.horta.alterar_umidade_ar), ("temperatura_agua", self.horta.alterar_temperatura_agua), ("ph", self.horta.alterar_ph), ("ec", self.horta.alterar_ec), ("nivel_agua", self.horta.alterar_nivel_agua)]:
-                                        if k in dados_esp: v(dados_esp[k])
-                                except: pass
+                                    self.after(0, lambda d=dados_esp: self.processar_telemetria_esp32(d))
+                                except Exception:
+                                    pass
                 except Exception as e:
-                    self.label_status_esp.configure(text="● FALHA/DESCONEXÃO ESP32", text_color="#EF4444")
-                    self.atualizar_log_serial(f"[ERRO SERIAL] Porta desconectada: {e}. Alternando para Simulador.\n")
+                    self.after(0, lambda: self.label_status_esp.configure(text="● FALHA/DESCONEXÃO ESP32", text_color="#EF4444"))
+                    self.after(0, lambda err=str(e): self.atualizar_log_serial(f"[ERRO SERIAL] Porta desconectada: {err}. Retornando ao Simulador.\n"))
                     self.after(0, lambda: self.switch_hardware_topo.deselect())
                     self.after(0, lambda: self.sincronizar_chaves("topo"))
             else:
-                self.label_status_esp.configure(text="● NENHUM ESP32 DETECTADO", text_color="#EF4444")
-                self.atualizar_log_serial("[AVISO] Nenhuma porta USB/Serial encontrada. Alternando para Simulador.\n")
+                self.after(0, lambda: self.label_status_esp.configure(text="● NENHUM ESP32 REAL DETECTADO", text_color="#EF4444"))
+                self.after(0, lambda: self.atualizar_log_serial("[ERRO] Nenhum ESP32 real encontrado via USB (COM1 ignorada por segurança). Alternando para Simulador.\n"))
                 self.after(0, lambda: self.switch_hardware_topo.deselect())
                 self.after(0, lambda: self.sincronizar_chaves("topo"))
 
@@ -1098,8 +1571,10 @@ class JanelaPrincipal(ctk.CTk):
     def fechar_conexao_serial(self):
         self.serial_thread_ativa = False
         if self.ser and self.ser.is_open:
-            try: self.ser.close()
-            except: pass
+            try:
+                self.ser.close()
+            except Exception:
+                pass
 
     def atualizar_log_serial(self, texto):
         self.log_serial_buffer.append(texto)
@@ -1110,7 +1585,8 @@ class JanelaPrincipal(ctk.CTk):
             self.serial_box_text.insert("0.0", "".join(self.log_serial_buffer))
             self.serial_box_text.see("end")
             self.serial_box_text.configure(state="disabled")
-        except: pass
+        except Exception:
+            pass
 
     # ================= CONTROLES MANUAIS (SLIM DESIGN) =================
     def mudar_temperatura_ar(self, v): self.horta.alterar_temperatura_ar(v); self.horta.diagnosticar(); self.atualizar_interface()
@@ -1183,12 +1659,24 @@ class JanelaPrincipal(ctk.CTk):
         self.dias_cultivo = 0
         self.tempo_contador = 0
         
-        self.historico_logs.clear(); self.historico_tempo.clear(); self.historico_saude_gem.clear()
-        for k in self.historico_sinc:
-            self.historico_sinc[k]["gem"].clear(); self.historico_sinc[k]["real"].clear()
+        self.horta = Horta()
         
-        for k, v in [("Temperatura do ar", 24.5), ("Umidade do ar", 60.0), ("Temperatura da água", 22.0), ("pH", 6.0), ("EC", 1.4), ("Nível da água", 100.0)]:
-            if k in self.sliders: self.sliders[k].set(v)
+        self.historico_logs.clear()
+        self.historico_tempo.clear()
+        self.historico_saude_gem.clear()
+        for k in self.historico_sinc:
+            self.historico_sinc[k]["gem"].clear()
+            self.historico_sinc[k]["real"].clear()
+        
+        for k, v, unid in [
+            ("Temperatura do ar", 24.5, "°C"), ("Umidade do ar", 60.0, "%"),
+            ("Temperatura da água", 22.0, "°C"), ("pH", 6.0, ""),
+            ("EC", 1.4, "mS/cm"), ("Nível da água", 100.0, "%")
+        ]:
+            if k in self.sliders:
+                self.sliders[k].set(v)
+            if k in self.labels_valores:
+                self.labels_valores[k].configure(text=f"{v:.1f} {unid}")
             if k == "Temperatura do ar": self.horta.alterar_temperatura_ar(v)
             elif k == "Umidade do ar": self.horta.alterar_umidade_ar(v)
             elif k == "Temperatura da água": self.horta.alterar_temperatura_agua(v)
@@ -1196,11 +1684,21 @@ class JanelaPrincipal(ctk.CTk):
             elif k == "EC": self.horta.alterar_ec(v)
             elif k == "Nível da água": self.horta.alterar_nivel_agua(v)
 
+        if hasattr(self, "seg_modo_luz"): self.seg_modo_luz.set("AUTO")
+        if hasattr(self, "seg_modo_exaustor"): self.seg_modo_exaustor.set("AUTO")
+        if hasattr(self, "seg_modo_bomba"): self.seg_modo_bomba.set("AUTO")
+        if hasattr(self, "entry_offset_ph"):
+            self.entry_offset_ph.delete(0, "end"); self.entry_offset_ph.insert(0, "0.0")
+        if hasattr(self, "entry_fator_ec"):
+            self.entry_fator_ec.delete(0, "end"); self.entry_fator_ec.insert(0, "1.0")
+        self.preencher_configuracao()
+
         for ax, canvas in [(self.ax1, self.canvas1), (self.ax2, self.canvas2), (self.ax3, self.canvas3), (self.ax_sinc, self.canvas_sinc)]:
-            ax.clear(); canvas.draw()
+            ax.clear()
+            canvas.draw()
         
         self.atualizar_interface()
-        self.atualizar_log_serial("\n[SISTEMA] Cultivo resetado para o Dia 0.\n")
+        self.atualizar_log_serial("\n[SISTEMA] Cultivo resetado completamente. Planta revivida para o Dia 0.\n")
 
     def exportar_logs_csv(self):
         try:
@@ -1224,7 +1722,7 @@ class JanelaPrincipal(ctk.CTk):
 
     def persistir_log_automatico(self, registro):
         try:
-            caminho_auto = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs_cultivo.csv")
+            caminho_auto = os.path.join(_RAIZ_DIR, "logs_cultivo.csv")
             arquivo_existe = os.path.exists(caminho_auto)
             with open(caminho_auto, "a", newline="", encoding="utf-8") as f:
                 w = csv.DictWriter(f, fieldnames=registro.keys())
@@ -1342,21 +1840,47 @@ class JanelaPrincipal(ctk.CTk):
         elif dados['temperatura_agua'] > getattr(cfg, 'temperatura_agua_max', 26): problemas.append(f"• Água quente ({dados['temperatura_agua']:.1f}°C)")
         if dados['nivel_agua'] < 20: problemas.append("• Reservatório baixo / Seco")
 
-        fan_status = "OFF"; fan_color = "#94A3B8"
-        if dados['temperatura_ar'] > getattr(cfg, 'temperatura_ar_max', 26): fan_status = "ON (Calor)"; fan_color = "#FB923C"
-        elif dados['umidade_ar'] > getattr(cfg, 'umidade_ar_max', 80): fan_status = "ON (Umidade)"; fan_color = "#38BDF8"
+        # Status real/espelhado do Exaustor (Relé 2)
+        fan_on = bool(dados.get("ventilacao_exaustor", False))
+        if self.horta.modo_exaustor == 1:
+            fan_status, fan_color = "ON (Manual)", "#10B981"
+        elif self.horta.modo_exaustor == 2:
+            fan_status, fan_color = "OFF (Manual)", "#EF4444"
+        elif fan_on:
+            if dados['temperatura_ar'] > getattr(cfg, 'temperatura_ar_max', 26):
+                fan_status, fan_color = "ON (Calor)", "#FB923C"
+            else:
+                fan_status, fan_color = "ON (Umidade)", "#38BDF8"
+        else:
+            fan_status, fan_color = "OFF (Auto)", "#94A3B8"
         self.label_dash_fan.configure(text=fan_status, text_color=fan_color)
 
+        # Status real/espelhado da Iluminação (Relé 1)
         hora = dados.get('hora_atual', datetime.now().hour)
-        inicio_luz = getattr(cfg, 'inicio_luz_hora', 6)
-        fim_luz = (inicio_luz + getattr(cfg, 'fotoperiodo_horas', 18)) % 24
-        luz_on = (inicio_luz <= hora < fim_luz) if inicio_luz < fim_luz else (hora >= inicio_luz or hora < fim_luz)
-        self.label_dash_luz.configure(text="ON (Ativa)" if luz_on else "OFF (Noturno)", text_color="#F59E0B" if luz_on else "#94A3B8")
+        luz_on = bool(dados.get("iluminacao", False))
+        if self.horta.modo_luz == 1:
+            txt_luz, cor_luz = "ON (Manual)", "#10B981"
+        elif self.horta.modo_luz == 2:
+            txt_luz, cor_luz = "OFF (Manual)", "#EF4444"
+        else:
+            txt_luz = "ON (Ativa)" if luz_on else "OFF (Noturno)"
+            cor_luz = "#F59E0B" if luz_on else "#94A3B8"
+        self.label_dash_luz.configure(text=txt_luz, text_color=cor_luz)
+
+        # Status da Bomba de Aeração DWC (Relé 4)
+        ar_on = bool(dados.get("bomba_ar", dados['nivel_agua'] > 10))
+        if hasattr(self, "label_status_bomba_ar"):
+            b_agua_on = bool(dados.get("bomba", False))
+            txt_ar = f"AR: {'ON' if ar_on else 'PARADO'} | ÁGUA: {'ON' if b_agua_on else 'OFF'}"
+            self.label_status_bomba_ar.configure(
+                text=txt_ar,
+                text_color="#10B981" if ar_on else "#EF4444"
+            )
 
         if len(problemas) == 0 and saude > 80:
             self.label_saude_status_texto.configure(text="✅ Condições ideais para o desenvolvimento", text_color="#10B981")
         else:
-            self.label_saude_status_texto.configure(text="⚠️ Anomalias Detectadas:\n" + "\n".join(problemas), text_color="#EF4444")
+            self.label_saude_status_texto.configure(text="⚠️️ Anomalias Detectadas:\n" + "\n".join(problemas), text_color="#EF4444")
 
         if "Temperatura do ar" in self.labels_metas:
             self.labels_metas["Temperatura do ar"].configure(text=f"Meta: {getattr(cfg, 'temperatura_ar_min', 18)} a {getattr(cfg, 'temperatura_ar_max', 26)} °C")
@@ -1375,13 +1899,15 @@ class JanelaPrincipal(ctk.CTk):
         self.label_dash_ec.configure(text=f"{dados['ec']:.1f} mS/cm")
         self.label_dash_nivel.configure(text="OK (100%)" if dados['nivel_agua'] > 90 else f"{dados['nivel_agua']:.0f}%")
 
-        t_real = self.ultimo_valor_esp.get("temperatura_ar", dados['temperatura_ar'])
-        u_real = self.ultimo_valor_esp.get("umidade_ar", dados['umidade_ar'])
-        ta_real = self.ultimo_valor_esp.get("temperatura_agua", dados['temperatura_agua'])
-        ph_real = self.ultimo_valor_esp.get("ph", dados['ph'])
-        ec_real = self.ultimo_valor_esp.get("ec", dados['ec'])
-        nv_real = self.ultimo_valor_esp.get("nivel_agua", dados['nivel_agua'])
-        saude_real = saude if self.modo_hardware_real else max(0.0, saude - 2.5)
+        t_real = float(self.ultimo_valor_esp.get("temperatura_ar", dados['temperatura_ar']))
+        u_real = float(self.ultimo_valor_esp.get("umidade_ar", dados['umidade_ar']))
+        ta_real = float(self.ultimo_valor_esp.get("temperatura_agua", dados['temperatura_agua']))
+        ph_real = float(self.ultimo_valor_esp.get("ph", dados['ph']))
+        ec_real = float(self.ultimo_valor_esp.get("ec", dados['ec']))
+        nv_real = float(self.ultimo_valor_esp.get("nivel_agua", dados['nivel_agua']))
+        saude_real = float(self.ultimo_valor_esp.get("saude", saude)) if self.modo_hardware_real else max(0.0, saude - 2.5)
+
+        self.atualizar_resumos_visuais()
 
         valores_reais = {"temp_ar": t_real, "umidade": u_real, "temp_agua": ta_real, "ph": ph_real, "ec": ec_real, "nivel": nv_real}
 
@@ -1402,7 +1928,12 @@ class JanelaPrincipal(ctk.CTk):
             self.labels_comparativo["gem"]["ec"].configure(text=f"{dados['ec']:.1f} mS/cm")
             self.labels_comparativo["gem"]["nivel"].configure(text=f"{dados['nivel_agua']:.0f}%")
         
-        texto_relogio = f"{hora:02d}:{dados.get('minuto_atual', 0):02d}  15/09/2026" if self.demonstracao_ativa else datetime.now().strftime("%H:%M  %d/%m/%Y")
+        if self.modo_hardware_real and "hora" in self.ultimo_valor_esp:
+            texto_relogio = f"RTC {self.ultimo_valor_esp['hora']}  {datetime.now().strftime('%d/%m/%Y')}"
+        elif self.demonstracao_ativa:
+            texto_relogio = f"{hora:02d}:{dados.get('minuto_atual', 0):02d}  Dia {dia_exibicao}"
+        else:
+            texto_relogio = datetime.now().strftime("%H:%M  %d/%m/%Y")
         self.label_relogio_topo.configure(text=texto_relogio)
         
         self.atualizar_graficos_avancados(dados, valores_reais)
@@ -1412,3 +1943,8 @@ class JanelaPrincipal(ctk.CTk):
         if self.automacao_ativa: self.horta.executar_automacao()
         self.atualizar_interface()
         self.after(1000, self.ciclo_interface)
+
+
+if __name__ == "__main__":
+    app = JanelaPrincipal()
+    app.mainloop()	

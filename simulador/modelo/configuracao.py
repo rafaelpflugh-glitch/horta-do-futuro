@@ -76,13 +76,19 @@ class ConfiguracaoCultivo:
         "SEMENTE",
         "MUDA",
         "VEGETATIVO",
+        "FLORACAO",
     )
 
-    # Mapeamento de compatibilidade para corrigir plurais automaticamente
+    # Mapeamento de compatibilidade para corrigir plurais e sinônimos automaticamente
     MAPA_CORRECAO_FASES = {
         "MUDAS": "MUDA",
         "SEMENTES": "SEMENTE",
         "VEGETATIVOS": "VEGETATIVO",
+        "VEGA": "VEGETATIVO",
+        "FLORA": "FLORACAO",
+        "FLORAÇÃO": "FLORACAO",
+        "FLORACAO_FRUTIFICACAO": "FLORACAO",
+        "FLORAÇÃO / FRUTIFICAÇÃO": "FLORACAO",
     }
 
     # ======================================================
@@ -357,6 +363,17 @@ class ConfiguracaoCultivo:
             "VEGETATIVO"
         )
 
+        self._garantir_receita_fase(
+            "FLORACAO"
+        )
+
+        # Atributos auxiliares de automação e ciclo
+        self.bomba_on_min = 15
+        self.bomba_off_min = 45
+        self.fan_exaustao_trigger = float(temperatura_ar_max)
+        self.fan_insuflacao_trigger = max(18.0, float(temperatura_ar_max) - 2.0)
+        self.dia_atual = 0
+
     # ======================================================
     # CONVERTER DICT → ReceitaFase
     # ======================================================
@@ -476,6 +493,10 @@ class ConfiguracaoCultivo:
         elif fase == "MUDA":
 
             receita.fotoperiodo_horas = 18.0
+
+        elif fase == "FLORACAO":
+
+            receita.fotoperiodo_horas = 12.0
 
         self.receitas[
             fase

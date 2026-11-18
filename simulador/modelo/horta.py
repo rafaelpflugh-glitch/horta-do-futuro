@@ -57,11 +57,21 @@ class Horta:
         # Atuadores e Relés
         self.ventilacao_exaustor = False
         self.ventilacao_insuflador = False
-        self.bomba = False
+        self.bomba = True
+        self.bomba_ar = True
         self.iluminacao = False  # Controlado por Relé (127V)
         self.intensidade_iluminacao_pwm = 0
         self.dimmer_manual_nivel = 100.0
         self.modo_dimmer_manual = False
+
+        # Modos de operação (0 = AUTO, 1 = ON, 2 = OFF) - Espelhados com o ESP32
+        self.modo_luz = 0
+        self.modo_exaustor = 0
+        self.modo_bomba_agua = 0
+
+        # Calibração de sensores (Espelhada com o ESP32)
+        self.offset_ph = 0.0
+        self.fator_ec = 1.0
 
         # Endpoint do ESP32 (Modo Físico)
         self.esp32_ip = "http://192.168.4.1/config"
@@ -174,19 +184,29 @@ class Horta:
         if diferenca_ph > 0.2:
             dose_ph_down_ml = round(diferenca_ph * self.taxa_ph_down * litros_atuais, 1)
             dose_ph_up_ml = 0.0
+            acao_ph = "Aplicar pH Down"
+            ml_ph = dose_ph_down_ml
         elif diferenca_ph < -0.2:
             dose_ph_up_ml = round(abs(diferenca_ph) * self.taxa_ph_up * litros_atuais, 1)
             dose_ph_down_ml = 0.0
+            acao_ph = "Aplicar pH Up"
+            ml_ph = dose_ph_up_ml
         else:
             dose_ph_down_ml = 0.0
             dose_ph_up_ml = 0.0
+            acao_ph = "Estável (Ideal)"
+            ml_ph = 0.0
 
         return {
             "nome_fertilizante": self.nome_fertilizante,
             "quantidade_total_g": round(gramas_totais, 1),
+            "gramas_fertilizante": round(gramas_totais, 1),
             "ph_down_ml": dose_ph_down_ml,
             "ph_up_ml": dose_ph_up_ml,
-            "volume_litros": round(litros_atuais, 1)
+            "acao_ph": acao_ph,
+            "ml_ph": ml_ph,
+            "volume_litros": round(litros_atuais, 1),
+            "volume_agua_litros": round(litros_atuais, 1)
         }
 
     def aplicar_dosagem(self, produto, quantidade):
@@ -224,9 +244,14 @@ class Horta:
         else:
             no_horario_luz = agora_minutos >= inicio_minutos or agora_minutos < fim_minutos
 
-        # Lâmpada 127V acionada por Relé (Simples e Direto)
-        self.iluminacao = no_horario_luz
-        self.intensidade_iluminacao_pwm = 100 if no_horario_luz else 0
+        # Lâmpada acionada por Relé conforme modo_luz (0=AUTO, 1=ON, 2=OFF)
+        if self.modo_luz == 1:
+            self.iluminacao = True
+        elif self.modo_luz == 2:
+            self.iluminacao = False
+        else:
+            self.iluminacao = no_horario_luz
+        self.intensidade_iluminacao_pwm = 100 if self.iluminacao else 0
 
     def esta_no_periodo_luz(self):
         inicio = self.config.inicio_luz_hora * 60 + self.config.inicio_luz_minuto
@@ -351,20 +376,44 @@ class Horta:
         return round(self.saude, 1)
 
     def executar_automacao(self):
-        # Lógica da Fan de Exaustão (Saída de Ar Quente)
-        if self.temperatura_ar > self.temp_exaustor_on:
+        # 1. Lógica do Exaustor (Respeita modo_exaustor: 0=AUTO, 1=ON, 2=OFF)
+        limite_temp = getattr(self.config, "temperatura_ar_max", self.temp_exaustor_on)
+        limite_umid = getattr(self.config, "umidade_ar_max", 80.0)
+        if self.modo_exaustor == 1:
             self.ligar_ventilacao_exaustor()
-        else:
+        elif self.modo_exaustor == 2:
             self.desligar_ventilacao_exaustor()
+        else:
+            if self.temperatura_ar > limite_temp or self.umidade_ar > limite_umid:
+                self.ligar_ventilacao_exaustor()
+            else:
+                self.desligar_ventilacao_exaustor()
 
-        # Lógica da Fan de Insuflação (Entrada de Ar Fresco / Renovação)
+        # 2. Lógica da Fan de Insuflação
         if self.temperatura_ar > self.temp_insuflador_on or self.umidade_ar > 75.0:
             self.ligar_ventilacao_insuflador()
         else:
             self.desligar_ventilacao_insuflador()
 
-        if self.nivel_agua <= 10:
+        # 3. Lógica das Bombas DWC (Água e Aeração com proteção de nível crítico)
+        nivel_critico = self.nivel_agua <= 10.0
+        self.bomba_ar = not nivel_critico
+
+        if nivel_critico:
             self.desligar_bomba()
+        elif self.modo_bomba_agua == 1:
+            self.ligar_bomba()
+        elif self.modo_bomba_agua == 2:
+            self.desligar_bomba()
+        else:
+            bon = max(1, int(getattr(self.config, "bomba_on_min", self.bomba_agua_liga_min)))
+            boff = max(0, int(getattr(self.config, "bomba_off_min", self.bomba_agua_desliga_min)))
+            ciclo = max(1, bon + boff)
+            minuto_ciclo = (self.hora_atual * 60 + self.minuto_atual) % ciclo
+            if minuto_ciclo < bon:
+                self.ligar_bomba()
+            else:
+                self.desligar_bomba()
 
         self.atualizar_fotoperiodo()
 
@@ -433,7 +482,13 @@ class Horta:
             "ventilacao_exaustor": self.ventilacao_exaustor,
             "ventilacao_insuflador": self.ventilacao_insuflador,
             "bomba": self.bomba,
+            "bomba_ar": self.bomba_ar,
             "iluminacao": self.iluminacao,
+            "modo_luz": self.modo_luz,
+            "modo_exaustor": self.modo_exaustor,
+            "modo_bomba_agua": self.modo_bomba_agua,
+            "offset_ph": self.offset_ph,
+            "fator_ec": self.fator_ec,
             "intensidade_iluminacao_pwm": self.intensidade_iluminacao_pwm,
             "fotoperiodo_horas": self.config.fotoperiodo_horas,
             "inicio_luz_hora": self.config.inicio_luz_hora,
