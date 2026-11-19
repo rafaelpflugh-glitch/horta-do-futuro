@@ -1,11 +1,14 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include "config.h"
+#include "dados.h"
+
+#if USAR_DISPLAY_TFT
+
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <XPT2046_Touchscreen.h>
-#include "config.h"
-#include "dados.h"
 #include "cultivo.h"
 #include "rtc.h"
 #include "sensores.h"
@@ -335,17 +338,20 @@ void desenharConteudoSistema() {
     tft.fillRoundRect(167, 38, 141, 160, 6, COR_CARD);
     tft.drawRoundRect(167, 38, 141, 160, 6, COR_BORDA);
     tft.setTextColor(COR_SUBTEXTO, COR_CARD);
-    tft.drawString("DIAGNOSTICO", 177, 46, 1);
+    tft.drawString("DIAGNOSTICO", 177, 45, 1);
+    tft.setTextColor((wifiConectado || wifiModoAP) ? COR_VERDE : COR_AVISO, COR_CARD);
+    String txtWifi = wifiConectado ? ("> IP: " + ipLocal) : (wifiModoAP ? ("> AP: " + ipLocal) : "> WiFi: Offline");
+    tft.drawString(txtWifi.substring(0, 21), 175, 64, 1);
     tft.setTextColor(gemeoConectado ? COR_VERDE : COR_AVISO, COR_CARD);
-    tft.drawString(gemeoConectado ? "> Gemeo: Sync OK" : "> Gemeo: Serial", 177, 72, 1);
+    tft.drawString(gemeoConectado ? "> Gemeo: Sync OK" : "> Gemeo: Serial", 175, 86, 1);
     tft.setTextColor(COR_VERDE, COR_CARD);
-    tft.drawString("> USB: 115200 bps", 177, 96, 1);
+    tft.drawString("> USB: 115200 bps", 175, 108, 1);
     tft.setTextColor(rtcPronto ? COR_VERDE : COR_AVISO, COR_CARD);
-    tft.drawString(rtcPronto ? "> RTC: DS3231 OK" : "> RTC: Soft Timer", 177, 120, 1);
+    tft.drawString(rtcPronto ? "> RTC: DS3231 OK" : "> RTC: Soft Timer", 175, 130, 1);
     tft.setTextColor(sdPronto ? COR_VERDE : COR_SUBTEXTO, COR_CARD);
-    tft.drawString(sdPronto ? "> SD: Gravando" : "> SD: Nao Inser.", 177, 144, 1);
+    tft.drawString(sdPronto ? "> SD: Gravando" : "> SD: Nao Inser.", 175, 152, 1);
     tft.setTextColor(atuadores.aeracao ? COR_VERDE : COR_ALERTA, COR_CARD);
-    tft.drawString(atuadores.aeracao ? "> Ar DWC: Ativo" : "> Ar DWC: Parado", 177, 168, 1);
+    tft.drawString(atuadores.aeracao ? "> Ar DWC: Ativo" : "> Ar DWC: Parado", 175, 174, 1);
 }
 
 void renderizarSistema() {
@@ -473,45 +479,61 @@ void atualizarValoresDisplay() {
 // INICIALIZAÇÃO DO DISPLAY E TOUCH (PAISAGEM 320x240)
 //=================================================
 void iniciarDisplay() {
-    // Desabilita todos os dispositivos SPI antes do boot para evitar conflito no barramento compartilhado
+    // 1. Desabilita todos os dispositivos SPI antes do boot para evitar conflito no barramento compartilhado
     pinMode(TFT_CS, OUTPUT);
     pinMode(TOUCH_CS, OUTPUT);
     pinMode(SD_CS, OUTPUT);
     digitalWrite(TFT_CS, HIGH);
     digitalWrite(TOUCH_CS, HIGH);
     digitalWrite(SD_CS, HIGH);
-    delay(20);
+    delay(50);
 
+    // 2. Inicializa o controlador gráfico (TPM408-2.8: 240x320 nativo)
     tft.init();
-    
-    // IMPORTANTE: Em displays 240x320 (ILI9341/ST7789), rotação 1 ou 3 = Paisagem 320x240 completa!
-    // (Rotação 0 e 2 são Retrato 240x320 e cortam 80 pixels da direita da tela!)
-    tft.setRotation(ROTACAO_TELA);
     tft.resetViewport();
 
+    // 3. Limpa TODA a memória GRAM nativa (240x320 Retrato) ANTES de rotacionar
+    //    Isso elimina definitivamente a faixa de 80px de ruído/lixo na borda!
+    tft.setRotation(0);
+    tft.fillScreen(COR_BG);
+
+    // 4. Aplica orientação Paisagem completa (320x240): use ROTACAO_TELA = 1 (ou 3 se invertida)
+    tft.setRotation(ROTACAO_TELA);
+    tft.resetViewport();
+    tft.fillScreen(COR_BG);
+
+    // 5. Inicializa e alinha o Touchscreen XPT2046 na mesma orientação paisagem
     touch.begin();
     touch.setRotation(ROTACAO_TELA);
-    
-    tft.fillScreen(COR_BG);
-    Serial.print("IHM Touch inicializada - Dimensoes ativas: ");
+
+    Serial.print("IHM Touch TPM408-2.8 inicializada | Rotacao=");
+    Serial.print(ROTACAO_TELA);
+    Serial.print(" | Dimensoes ativas=");
     Serial.print(tft.width());
     Serial.print("x");
-    Serial.println(tft.height());
+    Serial.print(tft.height());
+    Serial.print(" | ChipID(0x04)=0x");
+    Serial.println(tft.readcommand32(0x04), HEX);
 }
 
 //=================================================
-// MOTOR DE LEITURA DO TOUCHSCREEN
+// MOTOR DE LEITURA DO TOUCHSCREEN (PAISAGEM 320x240)
 //=================================================
 void atualizarDisplay() {
     if (touch.touched()) {
         TS_Point p = touch.getPoint();
         if (p.z < 200) return; // Ignora toques fantasmas / ruído elétrico
-        
-        int x = map(p.x, 300, 3800, 0, 320);
-        int y = map(p.y, 300, 3800, 0, 240);
-        
-        x = constrain(x, 0, 320);
-        y = constrain(y, 0, 240);
+
+        // Mapeia coordenadas do XPT2046 (já rotacionado via touch.setRotation(ROTACAO_TELA)) para 320x240
+        int x = TOUCH_INVERTER_X
+            ? map(p.x, TOUCH_MAX_X, TOUCH_MIN_X, 0, 320)
+            : map(p.x, TOUCH_MIN_X, TOUCH_MAX_X, 0, 320);
+        int y = TOUCH_INVERTER_Y
+            ? map(p.y, TOUCH_MAX_Y, TOUCH_MIN_Y, 0, 240)
+            : map(p.y, TOUCH_MIN_Y, TOUCH_MAX_Y, 0, 240);
+
+        x = constrain(x, 0, 319);
+        y = constrain(y, 0, 239);
         
         // 1. Toque na Tela Splash / Iniciar Sistema
         if (telaAtual == SPLASH) {
@@ -652,5 +674,18 @@ void mostrarInicializacao() {
     telaAtual = SPLASH;
     atualizarDisplayCompleto();
 }
+
+#else
+
+// Stubs leves quando USAR_DISPLAY_TFT == false (modo 100% Web App Wi-Fi / Serial)
+inline void iniciarDisplay() {
+    Serial.println("Display TFT desativado em config.h (modo headless Wi-Fi/Serial).");
+}
+inline void atualizarDisplay() {}
+inline void atualizarDisplayCompleto() {}
+inline void atualizarValoresDisplay() {}
+inline void mostrarInicializacao() {}
+
+#endif // USAR_DISPLAY_TFT
 
 #endif

@@ -87,6 +87,10 @@ bool gemeoConectado = false;
 bool sdPronto = false;
 bool rtcPronto = false;
 
+bool wifiConectado = false;
+bool wifiModoAP = false;
+String ipLocal = "0.0.0.0";
+
 //=================================================
 // HISTÓRICO PARA GRÁFICO TFT
 //=================================================

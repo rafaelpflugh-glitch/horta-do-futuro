@@ -71,6 +71,11 @@ extern bool gemeoConectado;
 extern bool sdPronto;
 extern bool rtcPronto;
 
+// Status da rede Wi-Fi e Web App embarcado
+extern bool wifiConectado;
+extern bool wifiModoAP;
+extern String ipLocal;
+
 // Histórico circular para plotagem no gráfico de Zoom do TFT
 extern float histTempAr[TAMANHO_HISTORICO];
 extern float histUmidAr[TAMANHO_HISTORICO];

@@ -34,6 +34,14 @@
 #endif
 #define ROTACAO_TELA    1   // 1 = Paisagem 320x240 (use 3 se ficar de cabeça para baixo; NUNCA 0 ou 2)
 
+// Calibração do Touchscreen XPT2046 (Modo Paisagem 320x240 - TPM408-2.8)
+#define TOUCH_MIN_X      250
+#define TOUCH_MAX_X      3800
+#define TOUCH_MIN_Y      250
+#define TOUCH_MAX_Y      3800
+#define TOUCH_INVERTER_X false
+#define TOUCH_INVERTER_Y false
+
 // 4. ATUADORES (Módulo Relé Optoacoplado - Low Trigger)
 #define RELE_BOMBA_AGUA 14  // Bomba Submersa (Timer de Circulação)
 #define RELE_BOMBA_AR   16  // Oxigenador de Aquário (Contínuo)
@@ -64,5 +72,17 @@
 #define MODO_SIMULACAO          false // false = Hardware real ativado!
 #define SENSOR_PH_REAL_ATIVO    true  // true = Lê ADC pino 34 | false = valor fixo 6.0
 #define SENSOR_EC_REAL_ATIVO    true  // true = Lê ADC pino 35 | false = valor fixo 1.4
+
+// 8. DISPLAY TFT TOUCH (Defina false caso queira operar 100% via Web App Wi-Fi / Serial)
+#define USAR_DISPLAY_TFT        true
+
+// 9. REDE WI-FI & WEB APP / PWA EMBARCADO (Acesso simultâneo PC e Celular)
+// Preencha com o Wi-Fi da sua casa ou deixe como está para iniciar direto no Modo AP reserva
+#define WIFI_SSID               "SUA_REDE_WIFI"
+#define WIFI_SENHA              "SUA_SENHA_WIFI"
+#define WIFI_HOSTNAME           "horta"         // Endereço amigável: http://horta.local
+#define WIFI_TIMEOUT_MS         12000UL         // Timeout (ms) tentando Wi-Fi antes de ativar AP reserva
+#define AP_SSID                 "HortaDoFuturo" // Rede própria de reserva (http://192.168.4.1)
+#define AP_SENHA                "horta2026"     // Senha do AP reserva (mínimo 8 caracteres)
 
 #endif
